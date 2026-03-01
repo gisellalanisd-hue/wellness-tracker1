@@ -1,8 +1,11 @@
 const CACHE = "wellness-v1";
-const FILES = ["/wellness-tracker/", "/wellness-tracker/index.html"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
+  e.waitUntil(
+    caches.open(CACHE).then(c => 
+      c.add("/wellness-tracker/index.html")
+    )
+  );
 });
 
 self.addEventListener("fetch", e => {
