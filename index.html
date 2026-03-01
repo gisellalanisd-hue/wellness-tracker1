@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Wellness Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET & BASE ── */
+*{box-sizing:border-box;margin:0;padding:0;}
+::-webkit-scrollbar{width:2px;height:2px;}::-webkit-scrollbar-thumb{background:#005EFF;}
+body,html{font-family:'Barlow',sans-serif;background:#F5F0E8;color:#1A1A2E;}
+:root{--bone:#F5F0E8;--bone-dark:#EDE7D9;--bone-mid:#D8D0C0;--ink:#1A1A2E;--ink-soft:#2E2E42;--ink-muted:#6B6B80;--ink-faint:#A8A8B8;--blue:#005EFF;--blue-light:#4080FF;--blue-bg:#EBF0FF;--line:#D0C8B8;--green:#00C853;--green-bg:#E8F5E9;--orange:#FF6D00;--red:#D50000;--today:#FFD600;--purple:#7B1FA2;}
+.app{min-height:100vh;background:var(--bone);color:var(--ink);}
+.inner{max-width:1060px;margin:0 auto;padding:20px 16px 100px;}
+.hkicker{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--ink-muted);}
+.htitle{font-family:'Barlow Condensed',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:900;line-height:.95;text-transform:uppercase;letter-spacing:-1px;}
+.htitle .acc{color:var(--blue);}
+.hrule{border:none;border-top:2.5px solid var(--ink);margin:10px 0 16px;}
+.nav-tabs{display:flex;border-bottom:2px solid var(--ink);margin-bottom:20px;overflow-x:auto;gap:0;}
+.nav-tab{background:transparent;border:none;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-muted);padding:9px 14px 8px;cursor:pointer;transition:all .15s;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;}
+.nav-tab:hover{color:var(--ink);}.nav-tab.active{color:var(--ink);border-bottom-color:var(--blue);}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1.5px solid var(--ink);border-radius:2px;margin-bottom:14px;overflow:hidden;}
+@media(max-width:600px){.hero-grid{grid-template-columns:1fr 1fr;}}
+.hero-card{padding:14px 16px;border-right:1.5px solid var(--ink);}
+.hero-card:last-child{border-right:none;}
+.hero-card .ring-wrap{display:flex;align-items:center;gap:10px;}
+.ring-pct{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;line-height:1;}
+.ring-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);margin-top:2px;}
+.ring-sub{font-size:11px;color:var(--ink-muted);margin-top:1px;}
+.hero-consejo{grid-column:1/-1;border-top:1.5px solid var(--ink);padding:12px 16px;display:flex;align-items:flex-start;gap:10px;background:var(--bone-dark);}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);border:1.5px solid var(--ink);border-radius:2px;margin-bottom:14px;}
+.stat-item{padding:10px 12px;border-right:1.5px solid var(--ink);position:relative;overflow:hidden;}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;line-height:1;}
+.stat-num.blue{color:var(--blue);}.stat-num.green{color:var(--green);}.stat-num.orange{color:var(--orange);}
+.stat-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);margin-top:2px;}
+.stat-fill{position:absolute;bottom:0;left:0;height:3px;background:var(--blue);transition:width .6s;}
+@media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr);}.stat-item:nth-child(2){border-right:none;}.stat-item:nth-child(3),.stat-item:nth-child(4){border-top:1.5px solid var(--ink);}}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.cal-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:-.5px;}
+.cal-nav{background:var(--bone-dark);border:1.5px solid var(--ink);padding:6px 12px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--ink);}
+.cal-nav:hover{background:var(--ink);color:var(--bone);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0;border:1.5px solid var(--ink);border-radius:2px;overflow:hidden;}
+.cal-dow{background:var(--ink);padding:6px 4px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--bone);text-align:center;}
+.cal-cell{min-height:110px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px;cursor:pointer;transition:background .12s;position:relative;background:var(--bone);display:flex;flex-direction:column;gap:2px;}
+.cal-cell:nth-child(7n){border-right:none;}.cal-cell:hover{background:var(--bone-dark);}
+.cal-cell.empty{background:var(--bone-dark);cursor:default;}
+.cal-cell.today{background:#FFFDE7;border-top:3px solid var(--today);}
+.cal-cell.drag-over{background:var(--blue-bg)!important;outline:2px dashed var(--blue);outline-offset:-2px;}
+.day-num{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;color:var(--ink);line-height:1;}
+.today-badge{display:inline-block;background:var(--today);color:var(--ink);font-size:7px;font-weight:900;letter-spacing:1px;padding:1px 3px;border-radius:1px;margin-left:3px;text-transform:uppercase;vertical-align:middle;}
+.chip{display:flex;align-items:center;gap:3px;border-radius:2px;padding:2px 4px;font-size:9px;font-weight:600;line-height:1.3;cursor:grab;background:var(--blue-bg);border:1px solid transparent;user-select:none;position:relative;}
+.chip:hover{border-color:var(--blue-light);}
+.chip.recipe{background:#F3E5F5;}
+.chip.empty{background:transparent;border:1px dashed var(--line);color:var(--ink-faint);cursor:pointer;}
+.chip.empty:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
+.chip-del{position:absolute;top:-4px;right:-4px;background:var(--red);color:white;border:none;border-radius:50%;width:12px;height:12px;font-size:8px;cursor:pointer;display:none;align-items:center;justify-content:center;}
+.chip:hover .chip-del{display:flex;}
+.cell-workout{display:flex;align-items:center;gap:3px;border-radius:2px;padding:2px 5px;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:white;cursor:pointer;margin-top:auto;}
+.cell-workout.empty-w{background:transparent;border:1px dashed var(--line);color:var(--ink-faint);}
+.cell-workout.empty-w:hover{border-color:var(--green);color:var(--green);}
+.week-grid{display:grid;grid-template-columns:56px repeat(7,1fr);border:1.5px solid var(--ink);border-radius:2px;}
+.wg-label{background:var(--bone-dark);border-right:1.5px solid var(--ink);border-bottom:1px solid var(--line);padding:6px 4px;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ink-muted);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1px;}
+.wg-day-head{background:var(--ink);padding:8px 4px;text-align:center;border-right:1px solid var(--ink-soft);cursor:pointer;}
+.wg-day-head.today-head{background:var(--orange);}.wg-day-head:hover{background:var(--blue);}
+.wg-head-dow{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--bone);}
+.wg-head-num{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--bone);line-height:1;}
+.wg-cell{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px;min-height:54px;cursor:pointer;transition:background .12s;position:relative;}
+.wg-cell:hover{background:var(--bone-dark);}.wg-cell.today-col{background:#FFFDE7;}
+.wg-cell.drag-over{background:var(--blue-bg)!important;outline:2px dashed var(--blue);outline-offset:-2px;}
+.wg-chip{border-radius:2px;padding:3px 5px;font-size:10px;font-weight:500;line-height:1.35;cursor:grab;background:var(--blue-bg);border:1px solid transparent;position:relative;user-select:none;}
+.wg-chip:hover{border-color:var(--blue-light);}.wg-chip.recipe{background:#F3E5F5;}
+.wg-chip.empty{background:transparent;border:1px dashed var(--line);color:var(--ink-faint);font-size:9px;cursor:pointer;}
+.wg-chip.empty:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
+.wg-chip-del{position:absolute;top:-4px;right:-4px;background:var(--red);color:white;border:none;border-radius:50%;width:13px;height:13px;font-size:8px;cursor:pointer;display:none;align-items:center;justify-content:center;}
+.wg-chip:hover .wg-chip-del{display:flex;}
+.detail-panel{border:1.5px solid var(--ink);border-radius:2px;overflow:hidden;margin-top:18px;}
+.detail-header{background:var(--ink);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.detail-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;color:var(--bone);letter-spacing:-.5px;}
+.detail-body{padding:16px;}
+.meal-row{display:flex;align-items:stretch;border-bottom:1.5px solid var(--line);cursor:pointer;transition:background .12s;position:relative;}
+.meal-row:last-child{border-bottom:none;}.meal-row:hover{background:var(--bone-dark);}.meal-row.filled{background:var(--blue-bg);}
+.meal-row.recipe-row{background:#F3E5F5;}.meal-row.recipe-row:hover{background:#E1BEE7;}
+.meal-icon-col{width:40px;display:flex;align-items:center;justify-content:center;font-size:14px;border-right:1.5px solid var(--line);flex-shrink:0;background:var(--bone-dark);}
+.meal-body{flex:1;padding:7px 9px;}
+.meal-name{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);}
+.meal-value{font-size:12px;font-weight:500;color:var(--ink);margin-top:2px;line-height:1.4;}
+.cal-badge{display:inline-flex;align-items:center;gap:3px;background:var(--green);color:white;padding:2px 6px;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;margin-top:3px;}
+.macro-pills{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap;}
+.macro-pill{font-size:8px;font-weight:700;padding:2px 5px;border-radius:2px;border:1.5px solid;}
+.macro-pill.p{color:#1565C0;border-color:#1565C0;background:#E3F2FD;}
+.macro-pill.c{color:#E65100;border-color:#E65100;background:#FFF3E0;}
+.macro-pill.g{color:#558B2F;border-color:#558B2F;background:#F1F8E9;}
+.btn-main{background:var(--ink);color:var(--bone);border:none;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .15s;border-radius:2px;}
+.btn-main:hover{background:var(--blue);}.btn-main:disabled{opacity:.4;cursor:default;}
+.btn-main.blue{background:var(--blue);}.btn-main.blue:hover{background:var(--blue-light);}
+.btn-main.orange{background:var(--orange);}.btn-main.green{background:var(--green);}
+.btn-main.purple{background:var(--purple);}.btn-main.red{background:var(--red);}
+.btn-sec{background:transparent;color:var(--ink-muted);border:1.5px solid var(--line);padding:8px 13px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;border-radius:2px;}
+.btn-sec:hover{border-color:var(--ink);color:var(--ink);}
+.modal-bg{position:fixed;inset:0;background:rgba(26,26,46,.78);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);}
+.modal-box{background:var(--bone);border:2px solid var(--ink);padding:22px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;border-radius:2px;}
+.modal-box.wide{max-width:780px;}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:-.5px;}
+.modal-sub{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-muted);margin-top:2px;margin-bottom:14px;}
+input[type=text],input[type=number],input[type=date],textarea,.form-input{background:var(--bone-dark);border:1.5px solid var(--ink);color:var(--ink);border-radius:2px;padding:9px 11px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;width:100%;outline:none;transition:border-color .15s;}
+input:focus,textarea:focus,.form-input:focus{border-color:var(--blue);background:var(--bone);}
+input::placeholder,textarea::placeholder{color:var(--ink-faint);}
+textarea{resize:none;}
+select.form-input{cursor:pointer;}
+.form-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:5px;display:block;}
+.sec-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px;}
+.info-tip{background:var(--blue-bg);border-left:3px solid var(--blue);padding:8px 12px;margin-top:10px;border-radius:1px;}
+.info-tip p{font-size:11px;color:var(--ink-soft);line-height:1.6;}
+.error-box{background:#FFEBEE;border:1.5px solid var(--red);padding:10px 14px;border-radius:2px;margin-bottom:12px;}
+.error-box p{font-size:12px;color:var(--red);font-weight:500;}
+.workout-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1.5px solid var(--ink);border-radius:2px;overflow:hidden;}
+.w-chip{background:var(--bone);border:none;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ink-muted);padding:10px 6px;cursor:pointer;transition:all .15s;text-align:center;}
+.w-chip:nth-child(3n){border-right:none;}.w-chip:nth-child(n+4){border-bottom:none;}
+.w-chip:hover{background:var(--bone-dark);}.w-chip.sel{background:var(--ink);color:var(--bone);}
+.check-big{width:46px;height:46px;border-radius:2px;border:2.5px solid var(--ink);background:transparent;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:var(--ink-muted);}
+.check-big.done{background:var(--blue);border-color:var(--blue);color:white;}
+.plan-day-card{border:1.5px solid var(--line);padding:12px;margin-bottom:-1px;background:var(--bone);}
+.plan-day-card.today-plan{border-color:var(--blue);background:var(--blue-bg);}
+.cell-popover{position:absolute;z-index:200;background:var(--bone);border:2px solid var(--ink);border-radius:3px;padding:10px;width:210px;box-shadow:0 8px 24px rgba(0,0,0,.2);top:100%;left:0;margin-top:4px;}
+.ingr-tag{display:inline-flex;align-items:center;gap:5px;background:var(--bone-dark);border:1.5px solid var(--ink);padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-radius:2px;cursor:pointer;transition:all .15s;}
+.ingr-tag:hover{background:var(--ink);color:var(--bone);}
+.ingr-tag.sel{background:var(--blue);color:white;border-color:var(--blue);}
+.rec-step{border:1.5px solid var(--ink);padding:16px;background:var(--bone);}
+.rec-step-num{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--blue);margin-bottom:4px;}
+.rec-step-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:-.5px;margin-bottom:12px;}
+.day-rec-card{border:1.5px solid var(--line);margin-bottom:-1px;background:var(--bone);overflow:hidden;}
+.day-rec-header{background:var(--ink-soft);color:var(--bone);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.meal-rec-row{display:flex;gap:0;border-bottom:1px solid var(--line);}
+.meal-rec-row:last-child{border-bottom:none;}
+.meal-rec-icon{width:36px;background:var(--bone-dark);display:flex;align-items:center;justify-content:center;font-size:13px;border-right:1px solid var(--line);flex-shrink:0;}
+.meal-rec-body{flex:1;padding:8px 10px;}
+.meal-rec-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;color:var(--ink);}
+.meal-rec-prep{font-size:10px;color:var(--ink-soft);margin-top:4px;line-height:1.5;}
+.speed-btn{background:var(--bone);border:1.5px solid var(--line);padding:8px 10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-muted);cursor:pointer;border-radius:2px;transition:all .12s;text-align:center;}
+.speed-btn:hover{border-color:var(--ink);color:var(--ink);}
+.speed-btn.sel{background:var(--ink);color:var(--bone);border-color:var(--ink);}
+.recipe-modal-meal{border:1.5px solid var(--line);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.recipe-modal-meal-head{background:var(--ink);color:var(--bone);padding:8px 14px;display:flex;align-items:center;gap:8px;}
+.recipe-modal-meal-body{padding:12px 14px;background:var(--bone);}
+.peso-entry{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--bone);}
+.peso-entry:last-child{border-bottom:none;}
+.peso-entry:nth-child(even){background:var(--bone-dark);}
+.peso-badge{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;}
+.peso-diff-up{color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;}
+.peso-diff-down{color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;}
+.peso-cell-badge{display:inline-flex;align-items:center;gap:2px;background:var(--bone-dark);border:1px solid var(--line);border-radius:2px;padding:1px 5px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;color:var(--ink-muted);cursor:pointer;margin-top:2px;}
+.peso-cell-badge:hover{border-color:var(--ink);color:var(--ink);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.fade-up{animation:fadeUp .2s ease forwards;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{display:inline-block;border:2px solid var(--bone-mid);border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.pulsing{animation:pulse 1.5s infinite;}
+/* API key banner */
+.apikey-banner{background:#FFFDE7;border:2px solid var(--today);padding:14px 18px;border-radius:2px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.apikey-banner p{font-size:12px;color:var(--ink-soft);flex:1;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useCallback,useRef,useEffect}=React;
+
+// ── CONFIG ──────────────────────────────────────────────────────────────
+const MODEL="claude-sonnet-4-20250514";
+const MEALS=["desayuno","almuerzo","cena","snack"];
+const MEAL_ICONS={desayuno:"☀️",almuerzo:"🌤",cena:"🌙",snack:"◦"};
+const MEAL_LABELS={desayuno:"DESAYUNO",almuerzo:"ALMUERZO",cena:"CENA",snack:"SNACK"};
+const WORKOUT_TYPES=["Pesas","Cardio","HIIT","Funcional","Yoga","Descanso"];
+const WORKOUT_COLORS={Pesas:"#005EFF",Cardio:"#00C853",HIIT:"#D50000",Funcional:"#FF6D00",Yoga:"#7B1FA2",Descanso:"#78909C"};
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const ACTIVITY_MULT={sedentario:1.2,poco:1.375,moderado:1.55,muy:1.725};
+const MONTH_NAMES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const DOW_SHORT=["LUN","MAR","MIÉ","JUE","VIE","SÁB","DOM"];
+const INGR_SUGERIDOS=["Pollo","Atún","Huevos","Avena","Arroz","Frijoles","Brócoli","Espinaca","Aguacate","Tomate","Tortillas","Pan integral","Yogur griego","Leche","Plátano","Manzana","Queso cottage","Lentejas","Aceite de oliva","Cebolla","Chile","Ajo"];
+const SPEED_OPTIONS=[
+  {id:"muy_lento",label:"Muy lento",desc:"±100 kcal/día",ajuste:{bajar:-100,mantener:0,musculo:100,rendimiento:100}},
+  {id:"lento",label:"Lento",desc:"±250 kcal/día",ajuste:{bajar:-250,mantener:0,musculo:200,rendimiento:150}},
+  {id:"moderado",label:"Moderado",desc:"±400 kcal/día",ajuste:{bajar:-400,mantener:0,musculo:300,rendimiento:200}},
+  {id:"rapido",label:"Rápido",desc:"±600 kcal/día",ajuste:{bajar:-600,mantener:0,musculo:400,rendimiento:300}},
+  {id:"agresivo",label:"Agresivo",desc:"±800 kcal/día",ajuste:{bajar:-800,mantener:0,musculo:500,rendimiento:400}},
+];
+const OBJETIVO_MACROS={bajar:{p:.35,c:.35,g:.30},mantener:{p:.25,c:.45,g:.30},musculo:{p:.30,c:.45,g:.25},rendimiento:{p:.25,c:.50,g:.25}};
+const NUTRICION_REF=`DENSIDADES CALÓRICAS (kcal/g):
+Arroz cocido:1.3|Pasta cocida:1.6|Pan blanco:2.7|Pan integral:2.5|Avena cruda:3.8
+Pollo pecho cocido:1.65|Carne molida 90%:1.8|Atún lata:1.16|Salmón:2.08|Huevo:70kcal|Clara:17kcal
+Leche entera:0.61/ml|Yogur griego:0.73|Queso Oaxaca:3.0|Queso cottage:0.72
+Aceite:9/ml|Aguacate:1.6|Frijoles cocidos:1.4|Lentejas:1.16
+Brócoli:0.34|Espinaca:0.23|Tomate:0.18|Manzana:0.52|Plátano:0.89`;
+const DEFAULT_PERFIL={nombre:"",peso:"",estatura:"",edad:"",sexo:"m",actividad:"moderado",objetivo:"bajar",velocidad:"moderado",metaCalManual:"",diasGym:5,inicioPlan:toKey(TODAY),pesoMeta:""};
+
+// ── HELPERS ──────────────────────────────────────────────────────────────
+function toKey(d){const dd=new Date(d);return `${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,"0")}-${String(dd.getDate()).padStart(2,"0")}`;}
+function fromKey(k){const[y,m,d]=k.split("-");return new Date(+y,+m-1,+d);}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function sameDay(a,b){return toKey(a)===toKey(b);}
+function getMonthDays(year,month){const first=new Date(year,month,1).getDay(),days=[];const offset=(first+6)%7;for(let i=0;i<offset;i++)days.push(null);const total=new Date(year,month+1,0).getDate();for(let i=1;i<=total;i++)days.push(new Date(year,month,i));return days;}
+function getWeekDays(ref){const d=new Date(ref),dow=(d.getDay()+6)%7,mon=addDays(d,-dow);return Array.from({length:7},(_,i)=>addDays(mon,i));}
+function emptyDay(){return{meals:{desayuno:"",almuerzo:"",cena:"",snack:""},calorias:{desayuno:null,almuerzo:null,cena:null,snack:null},calLoading:{desayuno:false,almuerzo:false,cena:false,snack:false},workout:{done:false,type:"",notes:""},water:0,mood:0,planned:false,peso:null};}
+function calcMetas(p){const{peso,estatura,edad,sexo,actividad,objetivo,velocidad,metaCalManual}=p;if(!peso||!estatura||!edad)return null;const bmr=sexo==="m"?10*peso+6.25*estatura-5*edad+5:10*peso+6.25*estatura-5*edad-161;const tdee=bmr*(ACTIVITY_MULT[actividad]||1.55);const spd=SPEED_OPTIONS.find(s=>s.id===velocidad)||SPEED_OPTIONS[2];const ajuste=spd.ajuste[objetivo]||0;const calAuto=Math.round(tdee+ajuste);const cals=metaCalManual?+metaCalManual:calAuto;const rango=Math.abs(ajuste/4)||75;const calMin=Math.max(sexo==="m"?1200:1000,Math.round(cals-rango));const calMax=Math.round(cals+rango);const mac=OBJETIVO_MACROS[objetivo]||OBJETIVO_MACROS.mantener;return{calorias:cals,calAuto,calMin,calMax,rango,proteinas:Math.round((cals*mac.p)/4),carbos:Math.round((cals*mac.c)/4),grasas:Math.round((cals*mac.g)/9),tdee:Math.round(tdee)};}
+
+// ── STORAGE ──────────────────────────────────────────────────────────────
+function saveLS(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}}
+function loadLS(key,def){try{const v=localStorage.getItem(key);return v?JSON.parse(v):def;}catch(e){return def;}}
+
+// ── API CALL ──────────────────────────────────────────────────────────────
+async function callClaude(system,userContent,maxTokens=1000,apiKey){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:MODEL,max_tokens:maxTokens,system,messages:[{role:"user",content:userContent}]})
+  });
+  const data=await res.json();
+  if(data.error)throw new Error(data.error.message);
+  return data.content?.map(i=>i.text||"").join("")||"";
+}
+
+// ── WEIGHT CHART ──────────────────────────────────────────────────────────
+function WeightChart({weightLog,pesoMeta}){
+  if(!weightLog||weightLog.length<2)return null;
+  const sorted=[...weightLog].sort((a,b)=>a.date.localeCompare(b.date));
+  const W=560,H=200,PL=52,PR=20,PT=16,PB=36;
+  const iW=W-PL-PR,iH=H-PT-PB;
+  const vals=sorted.map(e=>e.peso);
+  const allVals=pesoMeta?[...vals,+pesoMeta]:vals;
+  const minV=Math.min(...allVals)-1,maxV=Math.max(...allVals)+1,range=maxV-minV||1;
+  const xOf=i=>PL+(sorted.length===1?iW/2:(i/(sorted.length-1))*iW);
+  const yOf=v=>PT+iH-((v-minV)/range)*iH;
+  const yTicks=4,yStep=range/yTicks;
+  const gridLines=Array.from({length:yTicks+1},(_,i)=>minV+i*yStep);
+  const pts=sorted.map((e,i)=>`${xOf(i)},${yOf(e.peso)}`);
+  const linePath=`M ${pts.join(" L ")}`;
+  const areaPath=`M ${xOf(0)},${PT+iH} L ${pts.join(" L ")} L ${xOf(sorted.length-1)},${PT+iH} Z`;
+  const first=vals[0],last=vals[vals.length-1],isDown=last<=first;
+  const lineColor=isDown?"#00C853":"#FF6D00";
+  const pesoMetaY=pesoMeta?yOf(+pesoMeta):null;
+  return(
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
+      <defs>
+        <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={lineColor} stopOpacity=".18"/>
+          <stop offset="100%" stopColor={lineColor} stopOpacity=".01"/>
+        </linearGradient>
+        <clipPath id="cc"><rect x={PL} y={PT} width={iW} height={iH}/></clipPath>
+      </defs>
+      {gridLines.map((v,i)=>(
+        <g key={i}>
+          <line x1={PL} x2={PL+iW} y1={yOf(v)} y2={yOf(v)} stroke="#D0C8B8" strokeWidth="1" strokeDasharray="3,3"/>
+          <text x={PL-6} y={yOf(v)+4} textAnchor="end" fontSize="9" fill="#A8A8B8" fontFamily="'Barlow Condensed',sans-serif" fontWeight="700">{v.toFixed(1)}</text>
+        </g>
+      ))}
+      {pesoMetaY&&<><line x1={PL} x2={PL+iW} y1={pesoMetaY} y2={pesoMetaY} stroke="#005EFF" strokeWidth="1.5" strokeDasharray="6,4"/><text x={PL+iW-2} y={pesoMetaY-4} textAnchor="end" fontSize="9" fill="#005EFF" fontFamily="'Barlow Condensed',sans-serif" fontWeight="800">META {pesoMeta}kg</text></>}
+      <path d={areaPath} fill="url(#wg)" clipPath="url(#cc)"/>
+      <path d={linePath} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" clipPath="url(#cc)"/>
+      {sorted.map((e,i)=>{
+        const x=xOf(i),y=yOf(e.peso),isF=i===0,isL=i===sorted.length-1;
+        const show=isF||isL||sorted.length<=8;
+        const dateObj=fromKey(e.date);
+        return(
+          <g key={e.date}>
+            <circle cx={x} cy={y} r={isF||isL?5:3.5} fill={isF||isL?lineColor:"white"} stroke={lineColor} strokeWidth="2"/>
+            {show&&<text x={x} y={PT+iH+14} textAnchor="middle" fontSize="8" fill="#6B6B80" fontFamily="'Barlow Condensed',sans-serif" fontWeight="700">{dateObj.getDate()}/{dateObj.getMonth()+1}</text>}
+            {(isF||isL)&&<text x={x} y={y-9} textAnchor="middle" fontSize="10" fill={lineColor} fontFamily="'Barlow Condensed',sans-serif" fontWeight="900">{e.peso}kg</text>}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function Ring({pct,color,size=52,stroke=6}){
+  const r=(size-stroke)/2,circ=2*Math.PI*r,off=circ-(Math.min(pct,100)/100)*circ;
+  return(<svg width={size} height={size}><circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--bone-mid)" strokeWidth={stroke}/><circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" transform={`rotate(-90 ${size/2} ${size/2})`} style={{transition:"stroke-dashoffset .6s"}}/></svg>);
+}
+
+function downloadRecetarioPDF(recResult,recStart,perfil,metas){
+  const start=fromKey(recStart);
+  let html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Recetario</title><style>body{font-family:Arial,sans-serif;max-width:900px;margin:0 auto;padding:24px;color:#1A1A2E;}h1{font-size:32px;font-weight:900;text-transform:uppercase;margin-bottom:4px;}.sub{font-size:12px;color:#6B6B80;margin-bottom:24px;}.day{page-break-inside:avoid;margin-bottom:28px;border:2px solid #1A1A2E;border-radius:4px;overflow:hidden;}.day-head{background:#1A1A2E;color:white;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;}.day-head h2{font-size:18px;text-transform:uppercase;margin:0;}.day-head .kcal{font-size:22px;font-weight:900;color:#FFD600;}.meal{display:flex;border-bottom:1px solid #D0C8B8;}.meal:last-child{border-bottom:none;}.meal-icon{width:44px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#EDE7D9;border-right:1px solid #D0C8B8;flex-shrink:0;}.meal-content{flex:1;padding:10px 14px;}.meal-type{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#6B6B80;margin-bottom:3px;}.meal-name{font-size:16px;font-weight:900;margin-bottom:3px;}.meal-prep{font-size:11px;line-height:1.6;color:#2E2E42;padding-left:10px;border-left:3px solid #7B1FA2;margin-bottom:6px;}.macros{display:flex;gap:8px;flex-wrap:wrap;}.macro{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;border:1.5px solid;}.macro.k{color:white;border-color:#00C853;background:#00C853;}footer{text-align:center;font-size:10px;color:#A8A8B8;margin-top:32px;}</style></head><body><h1>🍽 Recetario</h1><p class="sub">${perfil.nombre||""} · ${new Date().toLocaleDateString("es-MX")}</p>`;
+  recResult.forEach((day,i)=>{
+    const date=addDays(start,i);
+    const tc=(day.desayuno?.cal||0)+(day.almuerzo?.cal||0)+(day.cena?.cal||0)+(day.snack?.cal||0);
+    html+=`<div class="day"><div class="day-head"><h2>Día ${i+1} — ${date.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})}</h2><span class="kcal">${tc} kcal</span></div>`;
+    [["desayuno","☀️"],["almuerzo","🌤"],["cena","🌙"],["snack","◦"]].forEach(([meal,icon])=>{
+      const rec=day[meal];if(!rec)return;
+      html+=`<div class="meal"><div class="meal-icon">${icon}</div><div class="meal-content"><div class="meal-type">${meal.toUpperCase()}</div><div class="meal-name">${rec.nombre}</div>${rec.preparacion?`<div class="meal-prep">${rec.preparacion}</div>`:""}<div class="macros"><span class="macro k">🔥 ${rec.cal} kcal</span></div></div></div>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`<footer>Wellness Tracker IA · ${new Date().getFullYear()}</footer></body></html>`;
+  const blob=new Blob([html],{type:"text/html"});
+  const url=URL.createObjectURL(blob);
+  const w=window.open(url,"_blank");
+  if(w){w.onload=()=>{w.focus();w.print();};}
+}
+
+const dragRef={current:null};
+
+// ══════════════════════════════════════════════════════════════════════════
+// MAIN APP
+// ══════════════════════════════════════════════════════════════════════════
+function App(){
+  const [apiKey,setApiKey]=useState(()=>loadLS("wt_apikey",""));
+  const [apiKeyInput,setApiKeyInput]=useState("");
+  const [view,setView]=useState("calendario");
+  const [calView,setCalView]=useState("semana");
+  const [calDate,setCalDate]=useState(new Date(TODAY.getFullYear(),TODAY.getMonth(),1));
+  const [weekRef,setWeekRef]=useState(new Date(TODAY));
+  const [selectedDate,setSelectedDate]=useState(new Date(TODAY));
+  const [data,setData]=useState(()=>loadLS("wt_data",{}));
+  const [perfil,setPerfil]=useState(()=>loadLS("wt_perfil",DEFAULT_PERFIL));
+  const [editPerfil,setEditPerfil]=useState(false);
+  const [tmpPerfil,setTmpPerfil]=useState(DEFAULT_PERFIL);
+  const [modal,setModal]=useState(null);
+  const [mealImage,setMealImage]=useState(null);
+  const [recipeModal,setRecipeModal]=useState(null);
+  const [tempText,setTempText]=useState("");
+  const [manualEdit,setManualEdit]=useState(false);
+  const [manualVals,setManualVals]=useState({calorias:"",proteinas:"",carbos:"",grasas:""});
+  const [popover,setPopover]=useState(null);
+  const [popText,setPopText]=useState("");
+  const [wPopover,setWPopover]=useState(null);
+  const [pesoPopover,setPesoPopover]=useState(null);
+  const [pesoInput,setPesoInput]=useState("");
+  const [dragOver,setDragOver]=useState(null);
+  const [consejo,setConsejo]=useState("");
+  const [consejoLoading,setConsejoLoading]=useState(false);
+  const [weightLog,setWeightLog]=useState(()=>loadLS("wt_weightlog",[]));
+  const [planDays,setPlanDays]=useState(7);
+  const [planStart,setPlanStart]=useState(toKey(TODAY));
+  const [planLoading,setPlanLoading]=useState(false);
+  const [planResult,setPlanResult]=useState(null);
+  const [planError,setPlanError]=useState("");
+  const [recStep,setRecStep]=useState(1);
+  const [recIngredientes,setRecIngredientes]=useState("");
+  const [recDias,setRecDias]=useState(7);
+  const [recStart,setRecStart]=useState(toKey(TODAY));
+  const [recLoading,setRecLoading]=useState(false);
+  const [recResult,setRecResult]=useState(null);
+  const [recError,setRecError]=useState("");
+  const [recPreviewDay,setRecPreviewDay]=useState(null);
+  const [newPesoDate,setNewPesoDate]=useState(toKey(TODAY));
+  const [newPesoVal,setNewPesoVal]=useState("");
+
+  // Auto-save
+  useEffect(()=>saveLS("wt_data",data),[data]);
+  useEffect(()=>saveLS("wt_perfil",perfil),[perfil]);
+  useEffect(()=>saveLS("wt_weightlog",weightLog),[weightLog]);
+
+  const metas=calcMetas(perfil);
+  const getDay=useCallback(d=>data[toKey(d)]||emptyDay(),[data]);
+  const setDay=useCallback((d,upd)=>{const k=toKey(d);setData(prev=>{const cur=prev[k]||emptyDay();const next=typeof upd==="function"?upd(cur):{...cur,...upd};return{...prev,[k]:next};});},[]);
+
+  const weekDays7=getWeekDays(TODAY);
+  const gymDone=weekDays7.filter(d=>getDay(d).workout.done).length;
+  const days7=Array.from({length:7},(_,i)=>addDays(TODAY,-(6-i)));
+  const dietaPct=Math.round((days7.filter(d=>MEALS.some(m=>getDay(d).meals[m])).length/7)*100);
+  const gymPct=Math.round((gymDone/(perfil.diasGym||5))*100);
+  const diasPlan=Math.max(1,Math.ceil((TODAY-fromKey(perfil.inicioPlan))/(1000*60*60*24))+1);
+
+  const sortedWeight=[...weightLog].sort((a,b)=>a.date.localeCompare(b.date));
+  const pesoActual=sortedWeight.length>0?sortedWeight[sortedWeight.length-1].peso:null;
+  const pesoInicial=sortedWeight.length>0?sortedWeight[0].peso:(+perfil.peso||null);
+  const pesoDiff=pesoActual&&pesoInicial?+(pesoActual-pesoInicial).toFixed(1):null;
+  const pesoProgPct=pesoInicial&&perfil.pesoMeta&&pesoActual?Math.min(100,Math.round(Math.abs((pesoInicial-pesoActual)/(pesoInicial-+perfil.pesoMeta))*100)):0;
+
+  const addWeightEntry=(dateKey,val)=>{const kg=parseFloat(val);if(!kg||kg<20||kg>300)return;setWeightLog(prev=>[...prev.filter(e=>e.date!==dateKey),{date:dateKey,peso:kg}]);};
+  const removeWeightEntry=(dateKey)=>setWeightLog(prev=>prev.filter(e=>e.date!==dateKey));
+  const getWeightForDate=(dateKey)=>weightLog.find(e=>e.date===dateKey)?.peso||null;
+
+  const fetchConsejo=async()=>{
+    if(!metas||!apiKey)return;
+    setConsejoLoading(true);
+    try{const t=await callClaude("Coach fitness. Consejo breve motivador en español. Máx 2 oraciones.",`objetivo=${perfil.objetivo},velocidad=${perfil.velocidad},dieta=${dietaPct}%,gym=${gymDone}/${perfil.diasGym},días=${diasPlan},pesoInicial=${pesoInicial},pesoActual=${pesoActual}`,200,apiKey);setConsejo(t||"Mantén constancia — cada día cuenta.");}
+    catch{setConsejo("Mantén constancia — cada día cuenta.");}
+    finally{setConsejoLoading(false);}
+  };
+
+  const openMeal=(meal,date)=>{const existing=getDay(date).calorias[meal];setModal({meal,date});setTempText(getDay(date).meals[meal]||"");setManualEdit(false);setManualVals(existing?{calorias:existing.calorias||"",proteinas:existing.proteinas||"",carbos:existing.carbos||"",grasas:existing.grasas||""}:{calorias:"",proteinas:"",carbos:"",grasas:""});};
+
+  const saveMeal=useCallback(async()=>{
+    if(!modal)return;
+    const{meal,date}=modal,txt=tempText.trim(),k=toKey(date),imgSnapshot=mealImage;
+    if(manualEdit){
+      const mv={calorias:+manualVals.calorias||null,proteinas:+manualVals.proteinas||null,carbos:+manualVals.carbos||null,grasas:+manualVals.grasas||null,confianza:"manual"};
+      setData(prev=>{const cur=prev[k]||emptyDay();const rec={...(cur.recetas||{})};delete rec[meal];return{...prev,[k]:{...cur,meals:{...cur.meals,[meal]:txt},calorias:{...cur.calorias,[meal]:mv},calLoading:{...cur.calLoading,[meal]:false},recetas:rec,imagenes:{...(cur.imagenes||{}),[meal]:imgSnapshot||cur.imagenes?.[meal]||null}}};});
+      setModal(null);setMealImage(null);return;
+    }
+    setData(prev=>{const cur=prev[k]||emptyDay();const rec={...(cur.recetas||{})};delete rec[meal];return{...prev,[k]:{...cur,meals:{...cur.meals,[meal]:txt},calorias:{...cur.calorias,[meal]:txt?cur.calorias[meal]:null},calLoading:{...cur.calLoading,[meal]:!!(txt||imgSnapshot)},recetas:rec,imagenes:{...(cur.imagenes||{}),[meal]:imgSnapshot||cur.imagenes?.[meal]||null}}};});
+    setModal(null);setMealImage(null);
+    if(!txt&&!imgSnapshot)return;
+    if(!apiKey)return;
+    try{
+      const userContent=imgSnapshot
+        ?[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:imgSnapshot.split(",")[1]}},{type:"text",text:txt?`Analiza la imagen y este texto: ${txt}`:"Analiza la imagen y estima macros."}]
+        :txt;
+      const t=await callClaude(`Nutricionista. Usa referencia:\n${NUTRICION_REF}\nResponde SOLO JSON sin markdown: {"calorias":450,"proteinas":25,"carbos":50,"grasas":15,"desglose":"...","confianza":"alta|media|baja"}`,userContent,500,apiKey);
+      const res=JSON.parse(t.replace(/```json|```/g,"").trim());
+      setData(prev=>{const cur=prev[k]||emptyDay();return{...prev,[k]:{...cur,calorias:{...cur.calorias,[meal]:res},calLoading:{...cur.calLoading,[meal]:false}}};});
+    }catch{setData(prev=>{const cur=prev[k]||emptyDay();return{...prev,[k]:{...cur,calLoading:{...cur.calLoading,[meal]:false}}};});}
+  },[modal,tempText,manualEdit,manualVals,mealImage,apiKey]);
+
+  const openPop=(dateKey,meal,e)=>{e.stopPropagation();setPopover({dateKey,meal});setPopText((data[dateKey]||emptyDay()).meals[meal]||"");};
+  const savePop=async()=>{
+    if(!popover)return;
+    const{dateKey,meal}=popover,txt=popText.trim();
+    setData(prev=>{const cur=prev[dateKey]||emptyDay();const rec={...(cur.recetas||{})};delete rec[meal];return{...prev,[dateKey]:{...cur,meals:{...cur.meals,[meal]:txt},calorias:{...cur.calorias,[meal]:txt?cur.calorias[meal]:null},calLoading:{...cur.calLoading,[meal]:!!txt},recetas:rec}};});
+    setPopover(null);
+    if(!txt||!apiKey)return;
+    try{const t=await callClaude(`Nutricionista. Usa referencia:\n${NUTRICION_REF}\nResponde SOLO JSON sin markdown: {"calorias":450,"proteinas":25,"carbos":50,"grasas":15,"desglose":"...","confianza":"alta|media|baja"}`,txt,500,apiKey);const res=JSON.parse(t.replace(/```json|```/g,"").trim());setData(prev=>{const cur=prev[dateKey]||emptyDay();return{...prev,[dateKey]:{...cur,calorias:{...cur.calorias,[meal]:res},calLoading:{...cur.calLoading,[meal]:false}}};});}catch{}
+  };
+
+  const deleteMeal=(d,meal)=>{const k=toKey(d);setData(prev=>{const cur=prev[k]||emptyDay();const rec={...(cur.recetas||{})};delete rec[meal];return{...prev,[k]:{...cur,meals:{...cur.meals,[meal]:""},calorias:{...cur.calorias,[meal]:null},recetas:rec}};});};
+
+  const handleDragStart=(e,dk,meal)=>{const dd=data[dk]||emptyDay();if(!dd.meals[meal])return;dragRef.current={dateKey:dk,meal,text:dd.meals[meal],calorias:dd.calorias[meal],receta:dd.recetas?.[meal]};e.dataTransfer.effectAllowed="copy";};
+  const handleDragEnd=()=>{dragRef.current=null;setDragOver(null);};
+  const handleDragOver=(e,tk,tm)=>{e.preventDefault();if(!dragRef.current)return;e.dataTransfer.dropEffect="copy";setDragOver(`${tk}::${tm||"all"}`);};
+  const handleDrop=(e,tk,tm)=>{e.preventDefault();e.stopPropagation();const p=dragRef.current;if(!p)return;const meal=tm||p.meal;dragRef.current=null;setDragOver(null);setData(prev=>{const cur=prev[tk]||emptyDay();const newRec={...(cur.recetas||{})};if(p.receta)newRec[meal]=p.receta;else delete newRec[meal];return{...prev,[tk]:{...cur,meals:{...cur.meals,[meal]:p.text},calorias:{...cur.calorias,[meal]:p.calorias},recetas:newRec,calLoading:{...cur.calLoading,[meal]:false}}};});};
+
+  const handleAutoPlan=async()=>{
+    if(!metas||!apiKey){setPlanError(!apiKey?"Configura tu API Key primero.":"Configura tu perfil.");return;}
+    setPlanLoading(true);setPlanError("");setPlanResult(null);
+    try{const t=await callClaude("Nutricionista. Responde SOLO array JSON sin markdown.",`Genera ${planDays} días variados, objetivo=${perfil.objetivo}, ${metas.calorias}kcal, P:${metas.proteinas}g C:${metas.carbos}g G:${metas.grasas}g. Array JSON: [{"desayuno":"","almuerzo":"","cena":"","snack":"","cal_desayuno":0,"prot_desayuno":0,"carb_desayuno":0,"gras_desayuno":0,"cal_almuerzo":0,"prot_almuerzo":0,"carb_almuerzo":0,"gras_almuerzo":0,"cal_cena":0,"prot_cena":0,"carb_cena":0,"gras_cena":0,"cal_snack":0,"prot_snack":0,"carb_snack":0,"gras_snack":0}]`,3000,apiKey);const m=t.replace(/```json|```/g,"").trim().match(/\[[\s\S]*\]/);if(!m)throw new Error("JSON inválido");setPlanResult(JSON.parse(m[0]));}
+    catch(ex){setPlanError(`Error: ${ex.message}`);}
+    finally{setPlanLoading(false);}
+  };
+
+  const applyAutoPlan=()=>{
+    if(!planResult)return;
+    const start=fromKey(planStart);
+    planResult.forEach((day,i)=>{const date=addDays(start,i),k=toKey(date);setData(prev=>{const nd={...(prev[k]||emptyDay())};nd.meals={desayuno:day.desayuno,almuerzo:day.almuerzo,cena:day.cena,snack:day.snack};nd.calorias={desayuno:{calorias:day.cal_desayuno,proteinas:day.prot_desayuno,carbos:day.carb_desayuno,grasas:day.gras_desayuno},almuerzo:{calorias:day.cal_almuerzo,proteinas:day.prot_almuerzo,carbos:day.carb_almuerzo,grasas:day.gras_almuerzo},cena:{calorias:day.cal_cena,proteinas:day.prot_cena,carbos:day.carb_cena,grasas:day.gras_cena},snack:{calorias:day.cal_snack,proteinas:day.prot_snack,carbos:day.carb_snack,grasas:day.gras_snack}};nd.planned=true;nd.recetas={};return{...prev,[k]:nd};});});
+    setPlanResult(null);
+  };
+
+  const handleGenerarRecetario=async()=>{
+    if(!metas||!apiKey){setRecError(!apiKey?"Configura tu API Key primero.":"Configura tu perfil.");return;}
+    setRecLoading(true);setRecError("");setRecResult(null);
+    const dist={desayuno:Math.round(metas.calorias*.25),almuerzo:Math.round(metas.calorias*.35),cena:Math.round(metas.calorias*.30),snack:Math.round(metas.calorias*.10)};
+    const prompt=`Eres chef nutricionista mexicano. Ingredientes: ${recIngredientes}\nMetas: ${metas.calorias}kcal, P:${metas.proteinas}g, C:${metas.carbos}g, G:${metas.grasas}g. Objetivo: ${perfil.objetivo}\nDist: Desayuno ${dist.desayuno}kcal, Almuerzo ${dist.almuerzo}kcal, Cena ${dist.cena}kcal, Snack ${dist.snack}kcal\nCrea ${recDias} días VARIADOS. Responde SOLO JSON array sin markdown:\n[{"dia":1,"desayuno":{"nombre":"...","descripcion":"...","ingredientes_usados":["..."],"preparacion":"...","cal":250,"prot":20,"carb":25,"gras":8},"almuerzo":{...},"cena":{...},"snack":{...}}]`;
+    try{const t=await callClaude("Chef nutricionista. SOLO JSON array.",prompt,6000,apiKey);const m=t.replace(/```json|```/g,"").trim().match(/\[[\s\S]*\]/);if(!m)throw new Error("JSON inválido");setRecResult(JSON.parse(m[0]));setRecStep(3);setRecPreviewDay(0);}
+    catch(ex){setRecError(`Error: ${ex.message}`);}
+    finally{setRecLoading(false);}
+  };
+
+  const applyRecetario=()=>{
+    if(!recResult)return;
+    const start=fromKey(recStart);
+    recResult.forEach((day,i)=>{const date=addDays(start,i),k=toKey(date);setData(prev=>{const cur=prev[k]||emptyDay();return{...prev,[k]:{...cur,meals:{desayuno:day.desayuno.nombre,almuerzo:day.almuerzo.nombre,cena:day.cena.nombre,snack:day.snack.nombre},calorias:{desayuno:{calorias:day.desayuno.cal,proteinas:day.desayuno.prot,carbos:day.desayuno.carb,grasas:day.desayuno.gras,confianza:"alta"},almuerzo:{calorias:day.almuerzo.cal,proteinas:day.almuerzo.prot,carbos:day.almuerzo.carb,grasas:day.almuerzo.gras,confianza:"alta"},cena:{calorias:day.cena.cal,proteinas:day.cena.prot,carbos:day.cena.carb,grasas:day.cena.gras,confianza:"alta"},snack:{calorias:day.snack.cal,proteinas:day.snack.prot,carbos:day.snack.carb,grasas:day.snack.gras,confianza:"alta"}},recetas:{desayuno:day.desayuno,almuerzo:day.almuerzo,cena:day.cena,snack:day.snack},planned:true}};});});
+    setRecStep(4);setView("calendario");
+  };
+
+  const monthDays=getMonthDays(calDate.getFullYear(),calDate.getMonth());
+  const weekDays=getWeekDays(weekRef);
+  const selDay=getDay(selectedDate);
+  const selTotalCals=MEALS.reduce((s,m)=>s+(selDay.calorias[m]?.calorias||0),0);
+  const hasRecipes=d=>{const dd=data[toKey(d)];return dd?.recetas&&Object.keys(dd.recetas).length>0;};
+
+  const PesoPop=({dateKey})=>{
+    if(pesoPopover!==dateKey)return null;
+    const existing=getWeightForDate(dateKey);
+    return(
+      <div className="cell-popover" onClick={e=>e.stopPropagation()} style={{zIndex:300,width:180}}>
+        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:10,fontWeight:800,letterSpacing:"1.5px",color:"var(--ink)",marginBottom:6}}>⚖️ PESO</div>
+        {existing&&<div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,color:"var(--blue)",marginBottom:6}}>{existing} kg</div>}
+        <input type="number" step="0.1" min={20} max={300} placeholder={existing||"75.0"} value={pesoInput} onChange={e=>setPesoInput(e.target.value)} autoFocus style={{padding:"7px 9px",fontSize:14,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900}}/>
+        <div style={{display:"flex",gap:4,marginTop:7}}>
+          <button className="btn-main" style={{padding:"5px 10px",fontSize:10,flex:1}} onClick={e=>{e.stopPropagation();addWeightEntry(dateKey,pesoInput);setPesoPopover(null);setPesoInput("");}}>✓</button>
+          {existing&&<button className="btn-main red" style={{padding:"5px 8px",fontSize:10}} onClick={e=>{e.stopPropagation();removeWeightEntry(dateKey);setPesoPopover(null);}}>🗑</button>}
+          <button className="btn-sec" style={{padding:"5px 8px",fontSize:10}} onClick={e=>{e.stopPropagation();setPesoPopover(null);}}>✕</button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderChip=(d,meal,compact=false)=>{
+    const k=toKey(d),dd=data[k]||emptyDay();
+    const val=dd.meals[meal],cal=dd.calorias[meal],loading=dd.calLoading[meal],hasRec=dd.recetas?.[meal];
+    const isPopOpen=popover?.dateKey===k&&popover?.meal===meal;
+    const dov=dragOver===`${k}::${meal}`;
+    return(
+      <div key={meal} style={{position:"relative"}}>
+        {val?(
+          <div className={`${compact?"chip":"wg-chip"} ${hasRec?"recipe":""}`}
+            draggable onDragStart={e=>{e.stopPropagation();handleDragStart(e,k,meal);}} onDragEnd={handleDragEnd}
+            onDragOver={e=>{e.preventDefault();e.stopPropagation();setDragOver(`${k}::${meal}`);}}
+            onDrop={e=>{e.stopPropagation();handleDrop(e,k,meal);}}
+            onClick={e=>{e.stopPropagation();openPop(k,meal,e);}}>
+            {compact&&<span style={{fontSize:9,flexShrink:0}}>{MEAL_ICONS[meal]}</span>}
+            <span style={{fontSize:compact?9:10,color:"var(--ink-soft)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:compact?80:undefined}}>{hasRec?hasRec.nombre:val}</span>
+            {loading&&<div className="spinner" style={{width:7,height:7,borderWidth:1.5,flexShrink:0}}/>}
+            {!loading&&cal?.calorias&&<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:compact?8:9,fontWeight:800,color:"var(--blue)",flexShrink:0}}>{cal.calorias}</span>}
+            <button className={compact?"chip-del":"wg-chip-del"} onClick={e=>{e.stopPropagation();deleteMeal(d,meal);}}>×</button>
+          </div>
+        ):(
+          <div className={`${compact?"chip empty":"wg-chip empty"} ${dov?"drag-over":""}`}
+            onDragOver={e=>{e.preventDefault();e.stopPropagation();setDragOver(`${k}::${meal}`);}}
+            onDrop={e=>{e.stopPropagation();handleDrop(e,k,meal);}}
+            onDragLeave={()=>setDragOver(null)}
+            onClick={e=>{e.stopPropagation();openPop(k,meal,e);}}>
+            {compact?`${MEAL_ICONS[meal]} +`:"+ agregar"}
+          </div>
+        )}
+        {isPopOpen&&(
+          <div className="cell-popover" onClick={e=>e.stopPropagation()}>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:10,fontWeight:800,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--blue)",marginBottom:5}}>{MEAL_ICONS[meal]} {meal}</div>
+            {hasRec&&<div style={{fontSize:10,color:"var(--purple)",marginBottom:5}}>🍽 <b>{hasRec.nombre}</b></div>}
+            <textarea rows={2} placeholder="Describe la comida…" value={popText} onChange={e=>setPopText(e.target.value)} autoFocus onClick={e=>e.stopPropagation()}/>
+            <div style={{display:"flex",gap:4,marginTop:6}}>
+              <button className="btn-main" style={{padding:"5px 10px",fontSize:10}} onClick={e=>{e.stopPropagation();savePop();}}>✓</button>
+              <button className="btn-sec" style={{padding:"5px 8px",fontSize:10}} onClick={e=>{e.stopPropagation();setPopover(null);}}>✕</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderWPopover=d=>{
+    const k=toKey(d),dd=data[k]||emptyDay();
+    if(wPopover!==k)return null;
+    return(
+      <div className="cell-popover" onClick={e=>e.stopPropagation()} style={{zIndex:300}}>
+        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:10,fontWeight:800,letterSpacing:"1.5px",color:"var(--ink)",marginBottom:6}}>EJERCICIO</div>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+          <button className={`check-big ${dd.workout.done?"done":""}`} style={{width:32,height:32,fontSize:14}} onClick={()=>setDay(d,day=>({...day,workout:{...day.workout,done:!day.workout.done}}))}>
+            {dd.workout.done?"✓":"○"}
+          </button>
+          <span style={{fontSize:11,color:"var(--ink-muted)"}}>{dd.workout.done?"Completado":"Marcar"}</span>
+        </div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:6}}>
+          {WORKOUT_TYPES.map(w=>(
+            <button key={w}
+              style={dd.workout.type===w?{background:WORKOUT_COLORS[w],borderColor:WORKOUT_COLORS[w],color:"white",border:"1.5px solid",padding:"4px 8px",fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:800,letterSpacing:".5px",textTransform:"uppercase",borderRadius:2,cursor:"pointer"}:{background:"var(--bone)",border:"1.5px solid var(--line)",padding:"4px 8px",fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:800,letterSpacing:".5px",textTransform:"uppercase",color:"var(--ink-muted)",cursor:"pointer",borderRadius:2}}
+              onClick={()=>setDay(d,day=>({...day,workout:{...day.workout,type:w,done:true}}))}>
+              {w}
+            </button>
+          ))}
+        </div>
+        <button className="btn-sec" style={{padding:"4px 10px",fontSize:10,width:"100%"}} onClick={()=>setWPopover(null)}>Listo</button>
+      </div>
+    );
+  };
+
+  const RecipeModal=()=>{
+    if(!recipeModal)return null;
+    const d=recipeModal.date,dd=data[toKey(d)]||emptyDay(),recs=dd.recetas||{};
+    const tc=MEALS.reduce((s,m)=>s+(dd.calorias[m]?.calorias||0),0);
+    return(
+      <div className="modal-bg" onClick={()=>setRecipeModal(null)}>
+        <div className="modal-box wide" onClick={e=>e.stopPropagation()}>
+          <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:4}}>
+            <div><div className="modal-title">🍽 Recetas del día</div><div className="modal-sub">{d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div></div>
+            <button className="btn-sec" style={{padding:"5px 12px",fontSize:11}} onClick={()=>setRecipeModal(null)}>✕</button>
+          </div>
+          {tc>0&&<div style={{display:"flex",gap:12,marginBottom:16,padding:"10px 14px",background:"var(--blue-bg)",border:"1.5px solid var(--blue)",borderRadius:2,flexWrap:"wrap"}}><span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900}}>Total: <span style={{color:"var(--blue)"}}>{tc} kcal</span></span></div>}
+          {MEALS.map(meal=>{const rec=recs[meal],cal=dd.calorias[meal],mealTxt=dd.meals[meal];return(
+            <div key={meal} className="recipe-modal-meal">
+              <div className="recipe-modal-meal-head">
+                <span style={{fontSize:16}}>{MEAL_ICONS[meal]}</span>
+                <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:800,letterSpacing:"2px",textTransform:"uppercase"}}>{MEAL_LABELS[meal]}</span>
+                {cal?.calorias&&<span style={{marginLeft:"auto",background:"var(--green)",color:"white",padding:"2px 8px",borderRadius:2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:900}}>{cal.calorias} kcal</span>}
+              </div>
+              <div className="recipe-modal-meal-body">
+                {rec?(<><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:20,fontWeight:900,marginBottom:3}}>{rec.nombre}</div>{rec.descripcion&&<div style={{fontSize:12,fontStyle:"italic",color:"var(--ink-muted)",marginBottom:8}}>{rec.descripcion}</div>}{rec.preparacion&&<div style={{fontSize:12,lineHeight:1.7,color:"var(--ink-soft)",borderLeft:"3px solid var(--purple)",paddingLeft:10,marginBottom:8}}>{rec.preparacion}</div>}</>)
+                :mealTxt?<div style={{fontSize:13,fontWeight:600}}>{mealTxt}</div>
+                :<div style={{fontSize:12,color:"var(--ink-faint)",fontStyle:"italic"}}>Sin registrar</div>}
+              </div>
+            </div>
+          );})}
+        </div>
+      </div>
+    );
+  };
+
+  return(
+    <div className="app" onClick={()=>{setPopover(null);setWPopover(null);setPesoPopover(null);}}>
+      <div className="inner">
+
+        {/* API KEY BANNER */}
+        {!apiKey&&(
+          <div className="apikey-banner">
+            <div style={{fontSize:24}}>🔑</div>
+            <p><b>Necesitas tu API Key de Anthropic</b> para usar las funciones de IA (estimación de macros, recetario, auto-plan, coach).<br/>Obtén una gratis en <a href="https://console.anthropic.com" target="_blank" rel="noreferrer" style={{color:"var(--blue)"}}>console.anthropic.com</a> → API Keys</p>
+            <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+              <input type="text" placeholder="sk-ant-api03-..." value={apiKeyInput} onChange={e=>setApiKeyInput(e.target.value)} style={{width:260,padding:"8px 10px",fontFamily:"monospace",fontSize:11,background:"white",border:"1.5px solid var(--ink)"}} onKeyDown={e=>{if(e.key==="Enter"&&apiKeyInput.startsWith("sk-")){setApiKey(apiKeyInput);saveLS("wt_apikey",apiKeyInput);}}}/>
+              <button className="btn-main" style={{padding:"9px 14px"}} onClick={()=>{if(apiKeyInput.startsWith("sk-")){setApiKey(apiKeyInput);saveLS("wt_apikey",apiKeyInput);}else alert("La API Key debe empezar con sk-");}}>Guardar</button>
+            </div>
+          </div>
+        )}
+        {apiKey&&(
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,background:"var(--green-bg)",border:"1.5px solid var(--green)",padding:"6px 12px",borderRadius:2,flexWrap:"wrap"}}>
+            <span style={{fontSize:11,color:"var(--green)",fontWeight:700}}>✓ API Key configurada</span>
+            <button onClick={()=>{setApiKey("");saveLS("wt_apikey","");setApiKeyInput("");}} style={{background:"transparent",border:"none",fontSize:10,color:"var(--ink-muted)",cursor:"pointer",textDecoration:"underline",marginLeft:"auto"}}>Cambiar</button>
+          </div>
+        )}
+
+        {/* HEADER */}
+        <div style={{marginBottom:14,display:"flex",alignItems:"flex-end",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
+          <div>
+            <p className="hkicker" style={{marginBottom:3}}>Sistema de bienestar</p>
+            <h1 className="htitle">{perfil.nombre?<>{perfil.nombre},&nbsp;</>:null}<span className="acc">{TODAY.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})}</span></h1>
+          </div>
+        </div>
+        <hr className="hrule"/>
+
+        {/* HERO */}
+        <div className="hero-grid">
+          <div className="hero-card">
+            <div className="ring-wrap">
+              <Ring pct={dietaPct} color={dietaPct>=80?"var(--green)":dietaPct>=50?"var(--orange)":"var(--red)"}/>
+              <div>
+                <div className="ring-pct" style={{color:dietaPct>=80?"var(--green)":dietaPct>=50?"var(--orange)":"var(--red)"}}>{dietaPct}%</div>
+                <div className="ring-label">Dieta</div>
+                <div className="ring-sub">{days7.filter(d=>MEALS.some(m=>getDay(d).meals[m])).length}/7 días</div>
+              </div>
+            </div>
+          </div>
+          <div className="hero-card">
+            <div className="ring-wrap">
+              <Ring pct={gymPct} color={gymPct>=100?"var(--green)":gymPct>=60?"var(--blue)":"var(--orange)"}/>
+              <div>
+                <div className="ring-pct" style={{color:gymPct>=100?"var(--green)":gymPct>=60?"var(--blue)":"var(--orange)"}}>{Math.min(gymPct,100)}%</div>
+                <div className="ring-label">Ejercicio</div>
+                <div className="ring-sub">{gymDone}/{perfil.diasGym} días/sem</div>
+              </div>
+            </div>
+          </div>
+          <div className="hero-card">
+            <div className="ring-wrap">
+              {pesoActual?(
+                <><Ring pct={pesoProgPct} color={pesoDiff<=0?"var(--green)":"var(--orange)"}/>
+                <div>
+                  <div className="ring-pct" style={{color:pesoDiff<=0?"var(--green)":"var(--orange)"}}>{pesoActual}kg</div>
+                  <div className="ring-label">Peso actual</div>
+                  <div className="ring-sub" style={{color:pesoDiff===null?"var(--ink-muted)":pesoDiff<=0?"var(--green)":"var(--orange)",fontWeight:700}}>
+                    {pesoDiff!==null?(pesoDiff<=0?`▼ ${Math.abs(pesoDiff)}kg`:`▲ +${pesoDiff}kg`):"Sin cambio"}
+                    {perfil.pesoMeta&&<span style={{color:"var(--ink-faint)",fontWeight:400}}> · meta {perfil.pesoMeta}kg</span>}
+                  </div>
+                </div></>
+              ):(
+                <div><div className="ring-pct" style={{color:"var(--ink-faint)"}}>—</div><div className="ring-label">Peso</div><div className="ring-sub">Registra en ⚖️</div></div>
+              )}
+            </div>
+          </div>
+          <div className="hero-consejo">
+            <div style={{fontSize:18,flexShrink:0,marginTop:1}}>{consejoLoading?"⏳":"🧠"}</div>
+            <div style={{flex:1}}>
+              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:800,letterSpacing:"2px",textTransform:"uppercase",color:"var(--blue)",marginBottom:3}}>Coach IA</div>
+              {consejoLoading?<div style={{display:"flex",alignItems:"center",gap:8}}><div className="spinner" style={{width:12,height:12}}/><span style={{fontSize:12,color:"var(--ink-muted)"}} className="pulsing">Generando…</span></div>
+              :consejo?<div style={{fontSize:13,color:"var(--ink-soft)",lineHeight:1.5,fontWeight:500}}>{consejo}</div>
+              :<button className="btn-sec" style={{fontSize:9,padding:"5px 10px"}} onClick={fetchConsejo}>{!apiKey?"Necesitas API Key":(metas?"✦ Obtener consejo IA":"Configura tu perfil →")}</button>}
+              {consejo&&<button style={{background:"transparent",border:"1.5px solid var(--line)",padding:"4px 10px",fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:800,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--ink-muted)",cursor:"pointer",borderRadius:2,marginTop:6}} onClick={()=>{setConsejo("");fetchConsejo();}}>↻ Nuevo</button>}
+            </div>
+          </div>
+        </div>
+
+        {/* STATS */}
+        <div className="stats-bar">
+          {[
+            {val:`${diasPlan}d`,label:"En plan",pct:diasPlan/90,cls:"blue"},
+            {val:`${gymDone}/7`,label:"Gym esta sem.",pct:gymDone/7,cls:gymDone>=(perfil.diasGym||5)?"green":"orange"},
+            {val:pesoActual?`${pesoActual}kg`:"—",label:"Peso actual",pct:pesoProgPct/100,cls:pesoDiff<=0?"green":"orange"},
+            {val:sortedWeight.length,label:"Pesajes registrados",pct:0,cls:"blue"}
+          ].map((s,i)=>(
+            <div key={i} className="stat-item">
+              <div className={`stat-num ${s.cls}`}>{s.val}</div>
+              <div className="stat-label">{s.label}</div>
+              <div className="stat-fill" style={{width:`${Math.min((s.pct||0)*100,100)}%`}}/>
+            </div>
+          ))}
+        </div>
+
+        {/* NAV */}
+        <div className="nav-tabs">
+          {[{id:"calendario",label:"📅 Calendario"},{id:"peso",label:"⚖️ Peso"},{id:"recetario",label:"🍽 Recetario IA"},{id:"autoplan",label:"🤖 Auto-Plan"},{id:"habitos",label:"📊 Hábitos"},{id:"perfil",label:"⚙️ Perfil"}].map(n=>(
+            <button key={n.id} className={`nav-tab ${view===n.id?"active":""}`} onClick={()=>setView(n.id)}>{n.label}</button>
+          ))}
+        </div>
+
+        {/* ══ CALENDARIO ══ */}
+        {view==="calendario"&&(
+          <div className="fade-up">
+            <div style={{display:"flex",gap:0,marginBottom:14,border:"1.5px solid var(--ink)",borderRadius:2,overflow:"hidden",width:"fit-content"}}>
+              {["semana","mes"].map(v=>(
+                <button key={v} onClick={()=>setCalView(v)} style={{background:calView===v?"var(--ink)":"transparent",color:calView===v?"var(--bone)":"var(--ink-muted)",border:"none",padding:"7px 18px",fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:800,letterSpacing:"1.5px",textTransform:"uppercase",cursor:"pointer"}}>{v}</button>
+              ))}
+            </div>
+
+            {calView==="semana"&&(
+              <>
+                <div className="cal-header">
+                  <h2 className="cal-title" style={{fontSize:20}}>Sem. {weekDays[0].getDate()}–{weekDays[6].getDate()} {MONTH_NAMES[weekDays[6].getMonth()]}</h2>
+                  <div style={{display:"flex",gap:6}}>
+                    <button className="cal-nav" onClick={()=>setWeekRef(d=>addDays(d,-7))}>‹</button>
+                    <button className="btn-sec" style={{padding:"6px 12px",fontSize:10}} onClick={()=>{setWeekRef(new Date(TODAY));setSelectedDate(new Date(TODAY));}}>Hoy</button>
+                    <button className="cal-nav" onClick={()=>setWeekRef(d=>addDays(d,7))}>›</button>
+                  </div>
+                </div>
+                <div style={{overflowX:"auto"}}>
+                <div className="week-grid" style={{minWidth:600}}>
+                  <div style={{background:"var(--ink-soft)",borderRight:"1.5px solid var(--ink)",borderBottom:"1px solid var(--ink-soft)"}}/>
+                  {weekDays.map((d,i)=>{const isT=sameDay(d,TODAY),hasRec=hasRecipes(d);return(
+                    <div key={i} className={`wg-day-head ${isT?"today-head":""}`} style={{borderBottom:"1px solid var(--ink-soft)"}}>
+                      <div className="wg-head-dow">{DOW_SHORT[i]}</div>
+                      <div className="wg-head-num">{d.getDate()}</div>
+                      {hasRec&&<button onClick={e=>{e.stopPropagation();setRecipeModal({date:new Date(d)});}} style={{display:"block",background:"rgba(255,255,255,.15)",border:"1px solid rgba(255,255,255,.3)",color:"white",borderRadius:2,padding:"1px 5px",fontSize:8,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,cursor:"pointer",marginTop:3,width:"100%"}}>🍽</button>}
+                    </div>
+                  );})}
+                  <div className="wg-label" style={{borderBottom:"1px solid var(--line)"}}><span style={{fontSize:12}}>⚖️</span><span>PESO</span></div>
+                  {weekDays.map((d,i)=>{const k=toKey(d),isT=sameDay(d,TODAY),w=getWeightForDate(k);return(
+                    <div key={`${k}-peso`} className={`wg-cell ${isT?"today-col":""}`} style={{borderBottom:"1px solid var(--line)",position:"relative",minHeight:40}} onClick={e=>{e.stopPropagation();setPesoPopover(pesoPopover===k?null:k);setPesoInput(w?String(w):"");}}>
+                      {w?<div style={{padding:"4px",textAlign:"center"}}><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:900,color:"var(--blue)"}}>{w}kg</div></div>
+                      :<div style={{padding:"4px",textAlign:"center",color:"var(--ink-faint)",fontSize:10,borderRadius:2,border:"1px dashed var(--line)",cursor:"pointer"}}>+</div>}
+                      <PesoPop dateKey={k}/>
+                    </div>
+                  );})}
+                  {MEALS.map(meal=>(
+                    <React.Fragment key={meal}>
+                      <div className="wg-label"><span style={{fontSize:13}}>{MEAL_ICONS[meal]}</span><span>{meal.substring(0,3).toUpperCase()}</span></div>
+                      {weekDays.map((d,i)=>{const k=toKey(d),isT=sameDay(d,TODAY),dov=dragOver===`${k}::${meal}`;return(
+                        <div key={`${k}-${meal}`} className={`wg-cell ${isT?"today-col":""} ${dov?"drag-over":""}`}
+                          onDragOver={e=>handleDragOver(e,k,meal)} onDrop={e=>handleDrop(e,k,meal)} onDragLeave={()=>setDragOver(null)}>
+                          {renderChip(d,meal,false)}
+                        </div>
+                      );})}
+                    </React.Fragment>
+                  ))}
+                  <div className="wg-label" style={{borderBottom:"none"}}><span style={{fontSize:13}}>🏋️</span><span>GYM</span></div>
+                  {weekDays.map((d,i)=>{const k=toKey(d),dd=data[k]||emptyDay(),isT=sameDay(d,TODAY);return(
+                    <div key={`${k}-w`} className={`wg-cell ${isT?"today-col":""}`} style={{borderBottom:"none",position:"relative"}} onClick={e=>{e.stopPropagation();setWPopover(wPopover===k?null:k);}}>
+                      <div style={{padding:"3px 4px",borderRadius:2,background:dd.workout.done?(WORKOUT_COLORS[dd.workout.type]||"var(--green)"):"transparent",border:`1.5px solid ${dd.workout.done?(WORKOUT_COLORS[dd.workout.type]||"var(--green)"):"var(--line)"}`,color:dd.workout.done?"white":"var(--ink-faint)",fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:".5px",textAlign:"center",cursor:"pointer"}}>
+                        {dd.workout.done?dd.workout.type||"✓":"+ gym"}
+                      </div>
+                      {renderWPopover(d)}
+                    </div>
+                  );})}
+                </div>
+                </div>
+              </>
+            )}
+
+            {calView==="mes"&&(
+              <>
+                <div className="cal-header">
+                  <h2 className="cal-title">{MONTH_NAMES[calDate.getMonth()]} {calDate.getFullYear()}</h2>
+                  <div style={{display:"flex",gap:6}}>
+                    <button className="cal-nav" onClick={()=>setCalDate(d=>new Date(d.getFullYear(),d.getMonth()-1,1))}>‹</button>
+                    <button className="btn-sec" style={{padding:"6px 12px",fontSize:10}} onClick={()=>{setCalDate(new Date(TODAY.getFullYear(),TODAY.getMonth(),1));setSelectedDate(new Date(TODAY));}}>Hoy</button>
+                    <button className="cal-nav" onClick={()=>setCalDate(d=>new Date(d.getFullYear(),d.getMonth()+1,1))}>›</button>
+                  </div>
+                </div>
+                <div className="cal-grid">
+                  {DOW_SHORT.map(d=><div key={d} className="cal-dow">{d}</div>)}
+                  {monthDays.map((d,idx)=>{
+                    if(!d)return<div key={`e${idx}`} className="cal-cell empty"/>;
+                    const k=toKey(d),dd=data[k]||emptyDay(),isToday=sameDay(d,TODAY);
+                    const tc=MEALS.reduce((s,m)=>s+(dd.calorias[m]?.calorias||0),0);
+                    const hasRec=dd.recetas&&Object.keys(dd.recetas).length>0;
+                    const w=getWeightForDate(k),dov=dragOver?.startsWith(k);
+                    return(
+                      <div key={k} className={`cal-cell ${isToday?"today":""} ${dov?"drag-over":""}`}
+                        onClick={()=>{setSelectedDate(new Date(d));setPopover(null);setWPopover(null);}}
+                        onDragOver={e=>handleDragOver(e,k,null)} onDrop={e=>handleDrop(e,k,null)} onDragLeave={()=>setDragOver(null)}>
+                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:2}}>
+                          <span className="day-num">{d.getDate()}{isToday&&<span className="today-badge">HOY</span>}</span>
+                          {hasRec&&<button title="Ver recetas" onClick={e=>{e.stopPropagation();setRecipeModal({date:new Date(d)});}} style={{background:"var(--purple)",border:"none",color:"white",borderRadius:2,padding:"1px 5px",fontSize:8,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,cursor:"pointer"}}>🍽</button>}
+                        </div>
+                        <div style={{position:"relative"}}>
+                          <div className="peso-cell-badge" onClick={e=>{e.stopPropagation();setPesoPopover(pesoPopover===k?null:k);setPesoInput(w?String(w):"");}}>
+                            ⚖️ {w?`${w}kg`:"+ peso"}
+                          </div>
+                          <PesoPop dateKey={k}/>
+                        </div>
+                        {MEALS.map(meal=>renderChip(d,meal,true))}
+                        {tc>0&&(
+                          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:metas&&tc>metas.calorias*1.1?"#FFF3E0":metas&&tc>=metas.calorias*.85?"#E8F5E9":"var(--blue-bg)",border:`1px solid ${metas&&tc>metas.calorias*1.1?"var(--orange)":metas&&tc>=metas.calorias*.85?"var(--green)":"var(--blue-light)"}`,borderRadius:2,padding:"2px 5px",marginTop:2}}>
+                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:900,color:metas&&tc>metas.calorias*1.1?"var(--orange)":metas&&tc>=metas.calorias*.85?"var(--green)":"var(--blue)"}}>{tc}<span style={{fontSize:8,fontWeight:500,color:"var(--ink-faint)"}}> kcal</span></span>
+                          </div>
+                        )}
+                        <div style={{marginTop:"auto",position:"relative"}}>
+                          <div className={`cell-workout ${dd.workout.done?"":"empty-w"}`}
+                            style={dd.workout.done?{background:WORKOUT_COLORS[dd.workout.type]||"var(--green)"}:{}}
+                            onClick={e=>{e.stopPropagation();setWPopover(wPopover===k?null:k);}}>
+                            {dd.workout.done?`🏋️ ${dd.workout.type||"Gym"}`:"+ Gym"}
+                          </div>
+                          {renderWPopover(d)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* DETAIL PANEL */}
+            <div className="detail-panel">
+              <div className="detail-header">
+                <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                  <button onClick={()=>setSelectedDate(d=>addDays(d,-1))} style={{background:"transparent",border:"1.5px solid rgba(255,255,255,.25)",color:"var(--bone)",padding:"4px 10px",fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,cursor:"pointer",borderRadius:2}}>‹</button>
+                  <div className="detail-title">
+                    {selectedDate.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})}
+                    {sameDay(selectedDate,TODAY)&&<span style={{fontSize:11,fontWeight:700,color:"var(--today)",marginLeft:8,background:"var(--ink)",padding:"2px 7px"}}>HOY</span>}
+                  </div>
+                  <button onClick={()=>setSelectedDate(d=>addDays(d,1))} style={{background:"transparent",border:"1.5px solid rgba(255,255,255,.25)",color:"var(--bone)",padding:"4px 10px",fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,cursor:"pointer",borderRadius:2}}>›</button>
+                </div>
+                <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+                  {hasRecipes(selectedDate)&&<button className="btn-main purple" style={{padding:"7px 14px",fontSize:10}} onClick={()=>setRecipeModal({date:new Date(selectedDate)})}>🍽 Recetas</button>}
+                  {metas&&selTotalCals>0&&<div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:22,fontWeight:900,color:selTotalCals>metas.calorias*1.1?"var(--orange)":selTotalCals>=metas.calorias*.85?"var(--green)":"var(--blue)"}}>{selTotalCals}<span style={{fontSize:12,color:"var(--bone)",opacity:.6,fontWeight:400}}> / {metas.calorias} kcal</span></div>}
+                </div>
+              </div>
+              <div className="detail-body">
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+                  <div>
+                    <p className="sec-label">Comidas</p>
+                    <div style={{border:"1.5px solid var(--ink)",borderRadius:2,overflow:"hidden"}}>
+                      {MEALS.map(meal=>{const val=selDay.meals[meal],cal=selDay.calorias[meal],loading=selDay.calLoading[meal],hasRec=selDay.recetas?.[meal],has=val?.trim();return(
+                        <div key={meal} className={`meal-row ${hasRec?"recipe-row":has?"filled":""}`} onClick={()=>openMeal(meal,selectedDate)}>
+                          <div className="meal-icon-col">{MEAL_ICONS[meal]}</div>
+                          <div className="meal-body">
+                            <div className="meal-name">{MEAL_LABELS[meal]}</div>
+                            {has?(<>
+                              {hasRec?<div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900}}>{hasRec.nombre}</div>:<div className="meal-value">{val}</div>}
+                              {selDay.imagenes?.[meal]&&<img src={selDay.imagenes[meal]} alt="foto" style={{width:54,height:54,objectFit:"cover",borderRadius:2,marginTop:5,border:"1.5px solid var(--line)",cursor:"pointer"}} onClick={e=>{e.stopPropagation();window.open(selDay.imagenes[meal],"_blank");}}/>}
+                              {loading&&<div style={{display:"flex",alignItems:"center",gap:5,marginTop:3}}><div className="spinner" style={{width:8,height:8}}/><span style={{fontSize:9,color:"var(--ink-muted)"}}>Calculando…</span></div>}
+                              {!loading&&cal?.calorias&&(<><div className="cal-badge">🔥 {cal.calorias}</div><div className="macro-pills">{cal.proteinas&&<span className="macro-pill p">P:{cal.proteinas}g</span>}{cal.carbos&&<span className="macro-pill c">C:{cal.carbos}g</span>}{cal.grasas&&<span className="macro-pill g">G:{cal.grasas}g</span>}</div></>)}
+                            </>):<div style={{fontSize:11,color:"var(--bone-mid)",marginTop:2}}>Toca para registrar</div>}
+                          </div>
+                        </div>
+                      );})}
+                    </div>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                    <div>
+                      <p className="sec-label">Peso del día</p>
+                      <div style={{border:"1.5px solid var(--ink)",borderRadius:2,padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontSize:24}}>⚖️</span>
+                        <div style={{flex:1}}>
+                          {getWeightForDate(toKey(selectedDate))?<div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:28,fontWeight:900,color:"var(--blue)"}}>{getWeightForDate(toKey(selectedDate))} <span style={{fontSize:14,color:"var(--ink-muted)",fontWeight:400}}>kg</span></div>
+                          :<div style={{fontSize:12,color:"var(--ink-muted)"}}>Sin registrar</div>}
+                        </div>
+                        <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                          <input type="number" step="0.1" min={20} max={300} placeholder="75.0" style={{width:72,padding:"7px 8px",fontSize:13,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,textAlign:"center"}}
+                            onKeyDown={e=>{if(e.key==="Enter"){addWeightEntry(toKey(selectedDate),e.target.value);e.target.value="";}}} id="detail-peso-input"/>
+                          <button className="btn-main green" style={{padding:"7px 10px",fontSize:10}} onClick={()=>{const el=document.getElementById("detail-peso-input");if(el){addWeightEntry(toKey(selectedDate),el.value);el.value="";}}}>✓</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="sec-label">Ejercicio</p>
+                      <div style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}>
+                        <button className={`check-big ${selDay.workout.done?"done":""}`} onClick={()=>setDay(selectedDate,d=>({...d,workout:{...d.workout,done:!d.workout.done}}))}>
+                          {selDay.workout.done?"✓":"○"}
+                        </button>
+                        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,color:selDay.workout.done?"var(--blue)":"var(--ink-muted)"}}>{selDay.workout.done?"Completado":"Sin marcar"}</div>
+                      </div>
+                      <div className="workout-grid">
+                        {WORKOUT_TYPES.map(w=>(
+                          <button key={w} className={`w-chip ${selDay.workout.type===w?"sel":""}`} onClick={()=>setDay(selectedDate,d=>({...d,workout:{...d.workout,type:w}}))}>
+                            {w}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="sec-label">Agua</p>
+                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                        <button style={{background:"var(--bone-dark)",border:"1.5px solid var(--ink)",padding:"7px 12px",cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,color:"var(--blue)",borderRadius:2}} onClick={()=>setDay(selectedDate,d=>({...d,water:Math.max(0,d.water-.5)}))}>−</button>
+                        <div style={{flex:1,height:34,background:"var(--bone-dark)",border:"1.5px solid var(--ink)",borderRadius:2,overflow:"hidden",position:"relative"}}>
+                          <div style={{height:"100%",width:`${Math.min((selDay.water/2.5)*100,100)}%`,background:"var(--blue)",transition:"width .4s"}}/>
+                          <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900}}>{selDay.water}L / 2.5L</div>
+                        </div>
+                        <button style={{background:"var(--bone-dark)",border:"1.5px solid var(--ink)",padding:"7px 12px",cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,color:"var(--blue)",borderRadius:2}} onClick={()=>setDay(selectedDate,d=>({...d,water:Math.min(5,d.water+.5)}))}>+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ PESO ══ */}
+        {view==="peso"&&(
+          <div className="fade-up">
+            <p className="sec-label">Seguimiento</p>
+            <h2 style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"clamp(28px,5vw,48px)",fontWeight:900,textTransform:"uppercase",letterSpacing:"-1px",marginBottom:16}}>Progreso de <span style={{color:"var(--green)"}}>Peso</span></h2>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0,border:"1.5px solid var(--ink)",borderRadius:2,overflow:"hidden",marginBottom:16}}>
+              {[{label:"Peso inicial",val:pesoInicial?`${pesoInicial}kg`:"—",color:"var(--ink-muted)"},{label:"Peso actual",val:pesoActual?`${pesoActual}kg`:"—",color:"var(--blue)"},{label:"Cambio total",val:pesoDiff!==null?(pesoDiff<=0?`▼ ${Math.abs(pesoDiff)}kg`:`▲ +${pesoDiff}kg`):"—",color:pesoDiff===null?"var(--ink-muted)":pesoDiff<=0?"var(--green)":"var(--orange)"},{label:"Meta",val:perfil.pesoMeta?`${perfil.pesoMeta}kg`:"—",color:"var(--blue)"}].map((c,i)=>(
+                <div key={i} style={{padding:"12px 14px",borderRight:i<3?"1.5px solid var(--ink)":"none",textAlign:"center"}}>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:26,fontWeight:900,color:c.color}}>{c.val}</div>
+                  <div style={{fontSize:9,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--ink-muted)",marginTop:3}}>{c.label}</div>
+                </div>
+              ))}
+            </div>
+            {pesoInicial&&perfil.pesoMeta&&pesoActual&&(
+              <div style={{border:"1.5px solid var(--blue)",background:"var(--blue-bg)",padding:"12px 16px",borderRadius:2,marginBottom:16}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:800,letterSpacing:"2px",textTransform:"uppercase",color:"var(--blue)"}}>Progreso hacia la meta</span>
+                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,color:"var(--blue)"}}>{pesoProgPct}%</span>
+                </div>
+                <div style={{height:8,background:"var(--bone-mid)",borderRadius:4,overflow:"hidden"}}>
+                  <div style={{height:"100%",width:`${pesoProgPct}%`,background:pesoProgPct>=100?"var(--green)":"var(--blue)",transition:"width .8s",borderRadius:4}}/>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",marginTop:6,fontSize:11,color:"var(--ink-muted)"}}>
+                  <span>Inicio: {pesoInicial}kg</span>
+                  {pesoProgPct<100&&<span>Faltan {Math.abs(+(pesoActual-+perfil.pesoMeta).toFixed(1))}kg</span>}
+                  <span>Meta: {perfil.pesoMeta}kg</span>
+                </div>
+              </div>
+            )}
+            <div style={{border:"1.5px solid var(--ink)",borderRadius:2,overflow:"hidden",marginBottom:16}}>
+              <div style={{background:"var(--ink)",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,textTransform:"uppercase",letterSpacing:"1px",color:"var(--bone)"}}>📈 Gráfica de progreso</span>
+                <span style={{fontSize:10,color:"rgba(255,255,255,.5)"}}>{sortedWeight.length} registros</span>
+              </div>
+              <div style={{padding:"16px",background:"var(--bone)"}}>
+                {sortedWeight.length>=2?<WeightChart weightLog={weightLog} pesoMeta={perfil.pesoMeta}/>
+                :<div style={{textAlign:"center",padding:"40px 20px",color:"var(--ink-muted)"}}><div style={{fontSize:36,marginBottom:8}}>📉</div><p style={{fontSize:14}}>Necesitas al menos 2 registros para ver la gráfica.</p></div>}
+              </div>
+            </div>
+            <div style={{border:"1.5px solid var(--ink)",borderRadius:2,overflow:"hidden",marginBottom:16}}>
+              <div style={{background:"var(--bone-dark)",padding:"10px 16px",borderBottom:"1.5px solid var(--ink)"}}><span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,textTransform:"uppercase",letterSpacing:"1px"}}>+ Registrar pesaje</span></div>
+              <div style={{padding:"14px 16px",display:"flex",gap:12,alignItems:"flex-end",flexWrap:"wrap"}}>
+                <div style={{flex:"0 0 160px"}}><label className="form-label">Fecha</label><input type="date" value={newPesoDate} onChange={e=>setNewPesoDate(e.target.value)}/></div>
+                <div style={{flex:"0 0 120px"}}><label className="form-label">Peso (kg)</label><input type="number" step=".1" min={20} max={300} placeholder="75.0" value={newPesoVal} onChange={e=>setNewPesoVal(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&newPesoVal){addWeightEntry(newPesoDate,newPesoVal);setNewPesoVal("");}}} /></div>
+                <button className="btn-main green" style={{padding:"9px 18px"}} disabled={!newPesoVal} onClick={()=>{addWeightEntry(newPesoDate,newPesoVal);setNewPesoVal("");}}>✓ Guardar</button>
+              </div>
+            </div>
+            {sortedWeight.length>0&&(
+              <div style={{border:"1.5px solid var(--ink)",borderRadius:2,overflow:"hidden"}}>
+                <div style={{background:"var(--ink)",padding:"10px 16px"}}><span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,textTransform:"uppercase",letterSpacing:"1px",color:"var(--bone)"}}>Historial</span></div>
+                <div>{[...sortedWeight].reverse().map((entry,i,arr)=>{const prev=arr[i+1];const diff=prev?+(entry.peso-prev.peso).toFixed(1):null;const date=fromKey(entry.date);const isT=sameDay(date,TODAY);return(
+                  <div key={entry.date} className="peso-entry">
+                    <div style={{display:"flex",alignItems:"center",gap:12}}>
+                      <div>
+                        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:10,fontWeight:800,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--ink-muted)"}}>{date.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}{isT&&<span style={{background:"var(--today)",color:"var(--ink)",padding:"1px 5px",marginLeft:6,fontSize:8,fontWeight:900,borderRadius:1}}>HOY</span>}</div>
+                        <div className="peso-badge" style={{color:"var(--blue)"}}>{entry.peso} kg</div>
+                      </div>
+                      {diff!==null&&<div className={diff<=0?"peso-diff-down":"peso-diff-up"}>{diff<=0?`▼ ${Math.abs(diff)}kg`:`▲ +${diff}kg`}</div>}
+                    </div>
+                    <button onClick={()=>removeWeightEntry(entry.date)} style={{background:"transparent",border:"1.5px solid var(--line)",color:"var(--ink-faint)",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",borderRadius:2,fontSize:12,fontWeight:900}}>×</button>
+                  </div>
+                );})}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══ RECETARIO ══ */}
+        {view==="recetario"&&(
+          <div className="fade-up">
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:10,marginBottom:6}}>
+              <div><p className="sec-label">Chef inteligente</p><h2 style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"clamp(28px,5vw,48px)",fontWeight:900,textTransform:"uppercase",letterSpacing:"-1px"}}>Recetario <span style={{color:"var(--purple)"}}>Personal</span></h2></div>
+              {recResult&&recStep>=3&&<button className="btn-main green" onClick={()=>downloadRecetarioPDF(recResult,recStart,perfil,metas||{})}>⬇ PDF</button>}
+            </div>
+            {!metas&&<div style={{border:"2px dashed var(--ink-muted)",padding:28,textAlign:"center",borderRadius:2,marginBottom:20}}><p style={{fontSize:14,color:"var(--ink-muted)",marginBottom:16}}>Configura tu perfil primero.</p><button className="btn-main" onClick={()=>setView("perfil")}>Ir al perfil →</button></div>}
+            {metas&&(
+              <>
+                <div style={{display:"flex",gap:0,border:"1.5px solid var(--ink)",borderRadius:2,overflow:"hidden",marginBottom:20,width:"fit-content"}}>
+                  {[{n:1,label:"Ingredientes"},{n:2,label:"Configurar"},{n:3,label:"Vista previa"},{n:4,label:"Aplicado"}].map((s,i)=>(
+                    <div key={s.n} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 14px",background:recStep>=s.n?"var(--ink)":"var(--bone-dark)",borderRight:i<3?"1.5px solid var(--line)":"none",cursor:recStep>s.n?"pointer":"default"}} onClick={()=>recStep>s.n&&setRecStep(s.n)}>
+                      <div style={{width:18,height:18,borderRadius:"50%",background:recStep>s.n?"var(--green)":recStep===s.n?"var(--today)":"rgba(255,255,255,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Barlow Condensed',sans-serif",fontSize:10,fontWeight:900,color:recStep>=s.n?"var(--ink)":"var(--ink-faint)",flexShrink:0}}>{recStep>s.n?"✓":s.n}</div>
+                      <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:10,fontWeight:800,letterSpacing:"1px",textTransform:"uppercase",color:recStep>=s.n?"var(--bone)":"var(--ink-faint)"}}>{s.label}</span>
+                    </div>
+                  ))}
+                </div>
+                {recStep===1&&(
+                  <div style={{display:"flex",flexDirection:"column",gap:16}}>
+                    <div style={{border:"1.5px solid var(--blue)",background:"var(--blue-bg)",padding:"10px 16px",display:"flex",gap:20,flexWrap:"wrap",borderRadius:2}}>
+                      <span style={{fontSize:11}}>🎯 <b>{perfil.objetivo}</b></span>
+                      <span style={{fontSize:11}}>🔥 <b style={{color:"var(--blue)"}}>{metas.calorias} kcal</b></span>
+                    </div>
+                    <div className="rec-step">
+                      <div className="rec-step-num">Paso 1 de 2</div>
+                      <div className="rec-step-title">¿Qué ingredientes tienes?</div>
+                      <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:12}}>
+                        {INGR_SUGERIDOS.map(ingr=>{const isSel=recIngredientes.includes(ingr);return(
+                          <button key={ingr} className={`ingr-tag ${isSel?"sel":""}`} onClick={()=>setRecIngredientes(prev=>isSel?prev.replace(new RegExp(`,?\\s*${ingr}\\s*,?`,"i"),"").replace(/^,\s*/,"").replace(/,\s*$/,"").trim():prev?`${prev}, ${ingr}`:ingr)}>
+                            {isSel&&"✓ "}{ingr}
+                          </button>
+                        );})}
+                      </div>
+                      <textarea rows={3} placeholder="Ej: 4 pechugas de pollo, 12 huevos, arroz…" value={recIngredientes} onChange={e=>setRecIngredientes(e.target.value)}/>
+                      <div style={{display:"flex",gap:8,marginTop:12}}>
+                        <button className="btn-main purple" onClick={()=>setRecStep(2)} disabled={!recIngredientes.trim()}>Continuar →</button>
+                        <button className="btn-sec" onClick={()=>setRecIngredientes("")}>Limpiar</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {recStep===2&&(
+                  <div className="rec-step">
+                    <div className="rec-step-num">Paso 2 de 2</div>
+                    <div className="rec-step-title">Configurar plan</div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}}>
+                      <div><label className="form-label">Fecha inicio</label><input type="date" value={recStart} onChange={e=>setRecStart(e.target.value)}/></div>
+                      <div><label className="form-label">Días — {recDias}</label><input type="range" min={1} max={14} value={recDias} onChange={e=>setRecDias(+e.target.value)} style={{width:"100%",accentColor:"var(--purple)",height:6,cursor:"pointer",marginTop:8}}/></div>
+                    </div>
+                    {recError&&<div className="error-box"><p>⚠️ {recError}</p></div>}
+                    <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                      <button className="btn-main purple" onClick={handleGenerarRecetario} disabled={recLoading||!apiKey}>{recLoading?<span style={{display:"flex",alignItems:"center",gap:8}}><div className="spinner" style={{width:14,height:14,borderWidth:2}}/> Creando…</span>:!apiKey?"Necesitas API Key":`🍽 Generar ${recDias} días`}</button>
+                      <button className="btn-sec" onClick={()=>setRecStep(1)}>← Atrás</button>
+                    </div>
+                  </div>
+                )}
+                {recStep===3&&recResult&&(
+                  <div>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
+                      <h3 style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:24,fontWeight:900,textTransform:"uppercase"}}>{recResult.length} días ✓</h3>
+                      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                        <button className="btn-main green" onClick={()=>downloadRecetarioPDF(recResult,recStart,perfil,metas)}>⬇ PDF</button>
+                        <button className="btn-main" onClick={applyRecetario}>✓ Aplicar</button>
+                        <button className="btn-sec" onClick={()=>{setRecStep(2);setRecResult(null);}}>↻ Regen.</button>
+                        <button className="btn-sec" onClick={()=>setRecStep(2)}>← Atrás</button>
+                      </div>
+                    </div>
+                    {recResult.map((day,idx)=>{
+                      const date=addDays(fromKey(recStart),idx);
+                      const tc=(day.desayuno?.cal||0)+(day.almuerzo?.cal||0)+(day.cena?.cal||0)+(day.snack?.cal||0);
+                      const isOpen=recPreviewDay===idx;
+                      return(
+                        <div key={idx} className="day-rec-card">
+                          <div className="day-rec-header" onClick={()=>setRecPreviewDay(isOpen?null:idx)}>
+                            <div>
+                              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,textTransform:"uppercase",letterSpacing:-.3}}>{date.toLocaleDateString("es-MX",{weekday:"short",day:"numeric",month:"short"})}{sameDay(date,TODAY)&&<span style={{background:"var(--today)",color:"var(--ink)",fontSize:8,fontWeight:900,padding:"2px 5px",marginLeft:8,borderRadius:1}}>HOY</span>}</div>
+                              {!isOpen&&<div style={{fontSize:10,color:"rgba(255,255,255,.6)",marginTop:2}}>{[day.desayuno,day.almuerzo,day.cena,day.snack].map(m=>m?.nombre||"").join(" · ")}</div>}
+                            </div>
+                            <div style={{display:"flex",alignItems:"center",gap:12}}>
+                              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:22,fontWeight:900,color:"var(--today)"}}>{tc}</div>
+                              <div style={{fontSize:16,color:"rgba(255,255,255,.6)"}}>{isOpen?"▲":"▼"}</div>
+                            </div>
+                          </div>
+                          {isOpen&&(
+                            <div>{MEALS.map(meal=>{const rec=day[meal];if(!rec)return null;return(
+                              <div key={meal} className="meal-rec-row">
+                                <div className="meal-rec-icon">{MEAL_ICONS[meal]}</div>
+                                <div className="meal-rec-body">
+                                  <div className="meal-rec-name">{rec.nombre}</div>
+                                  {rec.preparacion&&<div className="meal-rec-prep">📋 {rec.preparacion}</div>}
+                                  <span style={{fontSize:10,fontWeight:800,padding:"1px 6px",borderRadius:2,border:"1px solid",color:"var(--green)",borderColor:"var(--green)",background:"var(--green-bg)"}}>{rec.cal} kcal</span>
+                                </div>
+                              </div>
+                            );})}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {recStep===4&&(
+                  <div style={{textAlign:"center",padding:"40px 20px",border:"2px solid var(--green)",background:"var(--green-bg)",borderRadius:2}}>
+                    <div style={{fontSize:48,marginBottom:12}}>✅</div>
+                    <h3 style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:28,fontWeight:900,textTransform:"uppercase",marginBottom:8}}>¡Recetario aplicado!</h3>
+                    <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
+                      <button className="btn-main green" onClick={()=>setView("calendario")}>Ver en calendario →</button>
+                      <button className="btn-sec" onClick={()=>{setRecStep(1);setRecResult(null);setRecError("");}}>Crear otro</button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ══ AUTO-PLAN ══ */}
+        {view==="autoplan"&&(
+          <div className="fade-up">
+            <p className="sec-label">Planificador rápido</p>
+            <h2 style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"clamp(28px,5vw,48px)",fontWeight:900,textTransform:"uppercase",letterSpacing:"-1px",marginBottom:6}}>Auto-Plan IA</h2>
+            {!metas?<div style={{border:"2px dashed var(--ink-muted)",padding:28,textAlign:"center",borderRadius:2}}><p style={{fontSize:14,color:"var(--ink-muted)",marginBottom:16}}>Configura tu perfil primero.</p><button className="btn-main" onClick={()=>setView("perfil")}>Ir al perfil →</button></div>:(
+              <>
+                <div style={{border:"1.5px solid var(--blue)",background:"var(--blue-bg)",padding:"10px 16px",display:"flex",gap:20,flexWrap:"wrap",marginBottom:16,borderRadius:2}}>
+                  <span style={{fontSize:11}}>🎯 <b>{perfil.objetivo}</b></span>
+                  <span style={{fontSize:11}}>Meta: <b style={{color:"var(--blue)"}}>{metas.calorias} kcal</b></span>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+                  <div><label className="form-label">Fecha inicio</label><input type="date" value={planStart} onChange={e=>setPlanStart(e.target.value)}/></div>
+                  <div><label className="form-label">Días — {planDays}</label><input type="range" min={1} max={14} value={planDays} onChange={e=>setPlanDays(+e.target.value)} style={{width:"100%",accentColor:"var(--blue)",height:6,cursor:"pointer",marginTop:8}}/></div>
+                </div>
+                {planError&&<div className="error-box"><p>⚠️ {planError}</p></div>}
+                {!planResult&&!planLoading&&<button className="btn-main orange" onClick={handleAutoPlan} disabled={!apiKey}>{!apiKey?"Necesitas API Key":`🤖 Generar plan de ${planDays} días`}</button>}
+                {planLoading&&<div style={{display:"flex",alignItems:"center",gap:12,padding:"20px 0"}}><div className="spinner" style={{width:24,height:24,borderWidth:3}}/><p style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:800,textTransform:"uppercase",letterSpacing:"2px",color:"var(--ink-muted)"}} className="pulsing">Generando plan…</p></div>}
+                {planResult&&!planLoading&&(
+                  <div>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
+                      <p style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,textTransform:"uppercase"}}>Plan {planResult.length} días ✓</p>
+                      <div style={{display:"flex",gap:6}}><button className="btn-main green" onClick={applyAutoPlan}>✓ Aplicar</button><button className="btn-sec" onClick={()=>setPlanResult(null)}>Descartar</button></div>
+                    </div>
+                    {planResult.map((d,i)=>{
+                      const date=addDays(fromKey(planStart),i);
+                      const tc=(d.cal_desayuno||0)+(d.cal_almuerzo||0)+(d.cal_cena||0)+(d.cal_snack||0);
+                      return(
+                        <div key={i} className={`plan-day-card ${sameDay(date,TODAY)?"today-plan":""}`}>
+                          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,textTransform:"uppercase"}}>{date.toLocaleDateString("es-MX",{weekday:"short",day:"numeric",month:"short"})}</span>
+                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:"var(--blue)"}}>{tc} kcal</span>
+                          </div>
+                          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:4}}>
+                            {MEALS.map(m=>(
+                              <div key={m} style={{background:"var(--bone)",border:"1px solid var(--line)",padding:"5px 7px",borderRadius:1}}>
+                                <div style={{fontSize:8,fontWeight:800,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--blue)",marginBottom:2}}>{MEAL_ICONS[m]} {m}</div>
+                                <div style={{fontSize:11}}>{d[m]}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div style={{display:"flex",gap:6,marginTop:12}}>
+                      <button className="btn-main green" onClick={applyAutoPlan}>✓ Aplicar al calendario</button>
+                      <button className="btn-sec" onClick={()=>setPlanResult(null)}>Descartar</button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ══ HÁBITOS ══ */}
+        {view==="habitos"&&(
+          <div className="fade-up">
+            <p className="sec-label">Vista general</p>
+            <h2 style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"clamp(28px,5vw,48px)",fontWeight:900,textTransform:"uppercase",letterSpacing:"-1px",marginBottom:16}}>Resumen de Hábitos</h2>
+            {(()=>{
+              const days30=Array.from({length:30},(_,i)=>addDays(TODAY,-(29-i)));
+              const rows=[
+                {label:"Comidas",fn:(d)=>{const dd=data[toKey(d)];const n=dd?MEALS.filter(m=>dd.meals[m]).length:0;return{color:`rgba(0,94,255,${n/4})`};}},
+                {label:"Gym",fn:(d)=>{const dd=data[toKey(d)];const t=dd?.workout?.type||"";return{color:dd?.workout?.done?(WORKOUT_COLORS[t]||"var(--green)"):"rgba(0,200,83,.08)"};}},
+                {label:"Agua",fn:(d)=>{const w=data[toKey(d)]?.water||0;return{color:`rgba(66,165,245,${Math.min(w/2.5,1)})`};}}
+              ];
+              const stats=[
+                {label:"Días con comidas",val:days30.filter(d=>MEALS.some(m=>data[toKey(d)]?.meals[m])).length,color:"var(--blue)"},
+                {label:"Días de gym",val:days30.filter(d=>data[toKey(d)]?.workout?.done).length,color:"var(--green)"},
+                {label:"Pesajes",val:weightLog.filter(e=>{const d=fromKey(e.date);return(TODAY-d)<=30*86400000;}).length,color:"var(--orange)"},
+                {label:"Días con recetas",val:days30.filter(d=>data[toKey(d)]?.recetas&&Object.keys(data[toKey(d)].recetas).length>0).length,color:"var(--purple)"}
+              ];
+              return(
+                <div>
+                  {rows.map(row=>(
+                    <div key={row.label} style={{marginBottom:14}}>
+                      <p className="sec-label" style={{marginBottom:8}}>{row.label} — últimos 30 días</p>
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(10,1fr)",gap:3}}>
+                        {days30.map((d,i)=>{const{color}=row.fn(d);return<div key={i} title={d.toLocaleDateString("es-MX",{weekday:"short",day:"numeric",month:"short"})} onClick={()=>{setSelectedDate(new Date(d));setView("calendario");}} style={{aspectRatio:"1",background:color,border:sameDay(d,TODAY)?"2px solid var(--today)":"1px solid var(--line)",borderRadius:2,cursor:"pointer"}}/>;} )}
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:12,marginTop:8}}>
+                    {stats.map(s=>(
+                      <div key={s.label} style={{border:"1.5px solid var(--ink)",padding:"12px 14px",borderRadius:2}}>
+                        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:32,fontWeight:900,color:s.color}}>{s.val}<span style={{fontSize:14,color:"var(--ink-faint)",fontWeight:400}}>/30</span></div>
+                        <div style={{fontSize:10,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--ink-muted)",marginTop:2}}>{s.label}</div>
+                        <div style={{height:4,background:"var(--bone-dark)",marginTop:8,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:`${(s.val/30)*100}%`,background:s.color}}/></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* ══ PERFIL ══ */}
+        {view==="perfil"&&(
+          <div className="fade-up">
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10}}>
+              <div><p className="sec-label">Configuración</p><h2 style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"clamp(28px,5vw,48px)",fontWeight:900,textTransform:"uppercase",letterSpacing:"-1px"}}>Tu Perfil</h2></div>
+              {!editPerfil&&<button className="btn-main" onClick={()=>{setTmpPerfil({...perfil});setEditPerfil(true);}}>Editar</button>}
+            </div>
+            {!editPerfil?(!metas?(
+              <div style={{border:"2px dashed var(--ink-muted)",padding:28,textAlign:"center",borderRadius:2}}>
+                <p style={{fontSize:14,color:"var(--ink-muted)",marginBottom:16}}>Configura tu perfil para comenzar.</p>
+                <button className="btn-main" onClick={()=>{setTmpPerfil({...perfil});setEditPerfil(true);}}>Configurar ahora</button>
+              </div>
+            ):(
+              <>
+                <div style={{border:"1.5px solid var(--ink)",borderRadius:2,overflow:"hidden",marginBottom:14}}>
+                  {[["Nombre",perfil.nombre||"—"],["Peso inicial / Estatura",`${perfil.peso}kg / ${perfil.estatura}cm`],["Edad / Sexo",`${perfil.edad} años / ${perfil.sexo==="m"?"Masculino":"Femenino"}`],["Actividad",{sedentario:"Sedentario",poco:"Poco activo",moderado:"Moderado",muy:"Muy activo"}[perfil.actividad]],["Objetivo",{bajar:"Bajar de peso",mantener:"Mantener",musculo:"Ganar músculo",rendimiento:"Rendimiento"}[perfil.objetivo]],["Velocidad",SPEED_OPTIONS.find(s=>s.id===perfil.velocidad)?.label||"Moderado"],["Meta de peso",perfil.pesoMeta?`${perfil.pesoMeta}kg`:"No definida"],["Meta gym",`${perfil.diasGym} días/semana`]].map(([k,v],i)=>(
+                    <div key={k} style={{display:"flex",borderBottom:"1px solid var(--line)",background:i%2===0?"var(--bone)":"var(--bone-dark)"}}>
+                      <div style={{width:180,padding:"9px 14px",fontFamily:"'Barlow Condensed',sans-serif",fontSize:10,fontWeight:800,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--ink-muted)",borderRight:"1.5px solid var(--line)",flexShrink:0}}>{k}</div>
+                      <div style={{padding:"9px 14px",fontSize:13,fontWeight:500}}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{border:"1.5px solid var(--blue)",background:"var(--blue-bg)",padding:"12px 16px",borderRadius:2}}>
+                  <p className="sec-label" style={{color:"var(--blue)",marginBottom:8}}>Metas calculadas</p>
+                  <div style={{display:"flex",gap:18,flexWrap:"wrap"}}>
+                    {[["TDEE",`${metas.tdee} kcal`],["Meta",`${metas.calorias} kcal`],["Proteínas",`${metas.proteinas}g`],["Carbos",`${metas.carbos}g`],["Grasas",`${metas.grasas}g`]].map(([l,v])=>(
+                      <div key={l}><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:24,fontWeight:900}}>{v}</div><div style={{fontSize:9,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--blue)"}}>{l}</div></div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )):(
+              <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                  {[{label:"Nombre",key:"nombre",type:"text",placeholder:"Tu nombre"},{label:"Fecha inicio plan",key:"inicioPlan",type:"date"},{label:"Peso inicial (kg)",key:"peso",type:"number",placeholder:"78"},{label:"Estatura (cm)",key:"estatura",type:"number",placeholder:"175"},{label:"Edad",key:"edad",type:"number",placeholder:"28"},{label:"Peso meta (kg)",key:"pesoMeta",type:"number",placeholder:"70"}].map(f=>(
+                    <div key={f.key}><label className="form-label">{f.label}</label><input type={f.type} placeholder={f.placeholder} value={tmpPerfil[f.key]||""} className="form-input" onChange={e=>setTmpPerfil(p=>({...p,[f.key]:e.target.value}))}/></div>
+                  ))}
+                  <div><label className="form-label">Sexo</label><select className="form-input" value={tmpPerfil.sexo} onChange={e=>setTmpPerfil(p=>({...p,sexo:e.target.value}))}><option value="m">Masculino</option><option value="f">Femenino</option></select></div>
+                  <div><label className="form-label">Actividad</label><select className="form-input" value={tmpPerfil.actividad} onChange={e=>setTmpPerfil(p=>({...p,actividad:e.target.value}))}><option value="sedentario">Sedentario</option><option value="poco">Poco activo</option><option value="moderado">Moderado</option><option value="muy">Muy activo</option></select></div>
+                  <div><label className="form-label">Objetivo</label><select className="form-input" value={tmpPerfil.objetivo} onChange={e=>setTmpPerfil(p=>({...p,objetivo:e.target.value}))}><option value="bajar">Bajar de peso</option><option value="mantener">Mantener</option><option value="musculo">Ganar músculo</option><option value="rendimiento">Rendimiento</option></select></div>
+                  <div style={{gridColumn:"1/-1"}}><label className="form-label">Días gym/semana — {tmpPerfil.diasGym}d</label><input type="range" min={1} max={7} value={tmpPerfil.diasGym} onChange={e=>setTmpPerfil(p=>({...p,diasGym:+e.target.value}))} style={{width:"100%",accentColor:"var(--blue)",height:6,cursor:"pointer"}}/></div>
+                </div>
+                <div>
+                  <label className="form-label" style={{marginBottom:8}}>⚡ Velocidad del objetivo</label>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6}}>
+                    {SPEED_OPTIONS.map(s=>(
+                      <button key={s.id} className={`speed-btn ${tmpPerfil.velocidad===s.id?"sel":""}`} onClick={()=>setTmpPerfil(p=>({...p,velocidad:s.id}))}>
+                        <div style={{fontWeight:900,fontSize:11}}>{s.label}</div>
+                        <div style={{fontSize:9,opacity:.7,marginTop:2}}>{s.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:8}}>
+                  <button className="btn-main" onClick={()=>{setPerfil({...tmpPerfil});setEditPerfil(false);setConsejo("");}}>Guardar</button>
+                  <button className="btn-sec" onClick={()=>setEditPerfil(false)}>Cancelar</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <RecipeModal/>
+
+      {/* MEAL MODAL */}
+      {modal&&(
+        <div className="modal-bg" onClick={()=>setModal(null)}>
+          <div className="modal-box" onClick={e=>e.stopPropagation()}>
+            <div className="modal-title">{MEAL_ICONS[modal.meal]} {MEAL_LABELS[modal.meal]}</div>
+            <div className="modal-sub">{modal.date.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})}</div>
+            {getDay(modal.date).recetas?.[modal.meal]&&<div style={{background:"#F3E5F5",border:"1.5px solid var(--purple)",padding:"10px 14px",borderRadius:2,marginBottom:12}}><p style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:800,letterSpacing:"2px",textTransform:"uppercase",color:"var(--purple)",marginBottom:4}}>Receta IA activa</p><p style={{fontSize:13,fontWeight:700}}>{getDay(modal.date).recetas[modal.meal].nombre}</p></div>}
+            <textarea rows={3} placeholder='Ej: "2 huevos revueltos, tostada, café"' value={tempText} onChange={e=>setTempText(e.target.value)} autoFocus/>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginTop:12}}>
+              <button onClick={()=>setManualEdit(m=>!m)} style={{background:manualEdit?"var(--ink)":"transparent",color:manualEdit?"var(--bone)":"var(--ink-muted)",border:"1.5px solid var(--line)",padding:"5px 10px",fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:800,letterSpacing:"1.5px",textTransform:"uppercase",cursor:"pointer",borderRadius:2}}>✎ {manualEdit?"Editando macros":"Editar macros manual"}</button>
+            </div>
+            {manualEdit&&(
+              <div style={{border:"1.5px solid var(--ink)",padding:"12px",borderRadius:2,marginTop:10,background:"var(--bone-dark)"}}>
+                <p style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:800,letterSpacing:"2px",textTransform:"uppercase",color:"var(--blue)",marginBottom:10}}>Macros manuales</p>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+                  {[{key:"calorias",label:"Kcal"},{key:"proteinas",label:"Prot g"},{key:"carbos",label:"Carbs g"},{key:"grasas",label:"Grasas g"}].map(f=>(
+                    <div key={f.key}><label className="form-label">{f.label}</label><input type="number" min={0} value={manualVals[f.key]} onChange={e=>setManualVals(v=>({...v,[f.key]:e.target.value}))} style={{textAlign:"center",fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:900,padding:"6px 4px"}}/></div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {!manualEdit&&<div className="info-tip"><p>{!apiKey?"⚠️ Necesitas configurar tu API Key para estimar macros automáticamente.":"🤖 La IA estimará los macros automáticamente."}</p></div>}
+            <div style={{marginTop:12}}>
+              <label className="form-label">📷 Foto del platillo (opcional)</label>
+              <div style={{border:"1.5px dashed var(--ink-muted)",borderRadius:2,padding:"10px 14px",background:"var(--bone-dark)",cursor:"pointer",textAlign:"center",position:"relative"}}
+                onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor="var(--blue)";e.currentTarget.style.background="var(--blue-bg)";}}
+                onDragLeave={e=>{e.currentTarget.style.borderColor="var(--ink-muted)";e.currentTarget.style.background="var(--bone-dark)";}}
+                onDrop={e=>{e.preventDefault();e.currentTarget.style.borderColor="var(--ink-muted)";e.currentTarget.style.background="var(--bone-dark)";const f=e.dataTransfer.files[0];if(f&&f.type.startsWith("image/")){const r=new FileReader();r.onload=ev=>setMealImage(ev.target.result);r.readAsDataURL(f);}}}
+                onClick={()=>document.getElementById("meal-img-input").click()}>
+                <input id="meal-img-input" type="file" accept="image/*" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f){const r=new FileReader();r.onload=ev=>setMealImage(ev.target.result);r.readAsDataURL(f);}}}/>
+                {mealImage?(<div style={{position:"relative",display:"inline-block"}}><img src={mealImage} alt="platillo" style={{maxHeight:140,maxWidth:"100%",borderRadius:2,display:"block",margin:"0 auto"}}/><button onClick={e=>{e.stopPropagation();setMealImage(null);}} style={{position:"absolute",top:-6,right:-6,background:"var(--red)",color:"white",border:"none",borderRadius:"50%",width:20,height:20,fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900}}>×</button></div>)
+                :(<div><div style={{fontSize:28,marginBottom:4}}>🍽</div><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:800,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--ink-muted)"}}>Arrastra o toca para subir foto</div><div style={{fontSize:10,color:"var(--ink-faint)",marginTop:3}}>JPG, PNG, WEBP</div></div>)}
+              </div>
+            </div>
+            <div style={{display:"flex",gap:6,marginTop:14}}>
+              <button className="btn-main" onClick={saveMeal}>{manualEdit?"Guardar macros":mealImage?"Guardar + Analizar foto 📷":"Guardar + IA"}</button>
+              {tempText&&<button className="btn-sec" onClick={()=>setTempText("")}>Borrar</button>}
+              <button className="btn-sec" onClick={()=>{setModal(null);setMealImage(null);}}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
